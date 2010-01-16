@@ -1,0 +1,35 @@
+= Description
+   A security library for MS Windows that allows you to open existing or
+   create new security identifiers (SID's).
+
+= Synopsis
+   require 'win32/security'
+   include Win32
+   
+   sid = Security::SID.open('djberge')
+   
+   sid.valid? # => true
+   sid.to_s   # => "S-1-5-21-3733855671-1102023144-2002619019-1000"
+   sid.length # => 28
+   sid.sid    # => "\001\005\000\000\000\000\000\005\025\000\000\000..."
+   
+== Future Plans
+   Create classes that encapsulate ACL's, ACE's, Token's, etc.
+   
+   There are some unfinished versions of the ACL and ACE classes in CVS
+   if you're interested in taking a look.
+   
+== Known Issues
+   None that I'm aware of. Please file any bug reports on the project page
+   at http://www.rubyforge.org/projects/win32utils.
+    
+== License
+   Ruby's
+    
+== Copyright
+   (C) 2003-2009 Daniel J. Berger
+   All Rights Reserved
+    
+== Authors
+   Daniel J. Berger
+   Park Heesob

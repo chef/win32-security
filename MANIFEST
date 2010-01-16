@@ -1,0 +1,9 @@
+* CHANGES
+* MANIFEST
+* README
+* Rakefile
+* win32-security.gemspec
+* lib/win32/security.rb
+* lib/win32/security/sid.rb
+* test/test_security.rb
+* test/test_sid.rb

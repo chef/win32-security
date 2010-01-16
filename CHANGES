@@ -1,0 +1,13 @@
+= 0.1.2 - 2-Aug-2009
+* Now compatible with Ruby 1.9.x.
+* Switched test-unit and sys-admin from standard dependencies to development
+  dependencies.
+
+= 0.1.1 - 14-Jul-2009
+* Added some well known SID's as constants to the Win32::Security::SID class
+  for convenience, e.g. SID::World, SID::Everyone.
+* Fixes for the gemspec.
+* Changed license to Artistic 2.0.
+
+= 0.1.0 - 17-Dec-2008
+* Initial release
