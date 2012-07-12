@@ -14,9 +14,9 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files  = ['README', 'CHANGES', 'MANIFEST']
   spec.rubyforge_project = 'win32utils'
    
-  spec.add_dependency('windows-pr', '>= 1.0.8')
+  spec.add_dependency('windows-pr', '>= 1.2.2')
 
-  spec.add_development_dependency('test-unit', '>= 2.1.1')
+  spec.add_development_dependency('test-unit', '>= 2.5.0')
   spec.add_development_dependency('sys-admin', '>= 1.5.3')
    
   spec.description = <<-EOF
