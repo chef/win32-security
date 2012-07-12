@@ -1,4 +1,6 @@
 require 'windows/security'
+require 'windows/thread'
+require 'windows/process'
 require 'windows/error'
 require 'windows/msvcrt/string'
 require 'windows/msvcrt/buffer'
@@ -15,6 +17,9 @@ module Win32
       include Windows::Security
       include Windows::Error
       include Windows::MSVCRT::String
+      include Windows::MSVCRT::Buffer
+      include Windows::Thread
+      include Windows::Process
 
       extend Windows::Security
       extend Windows::Error
@@ -25,7 +30,7 @@ module Win32
       class Error < StandardError; end
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.2.0'
+      VERSION = '0.1.3'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -163,7 +168,8 @@ module Win32
       # Otherwise, the local host is used.
       #
       # If no account is provided then it retrieves information for the
-      # user account associated with the calling thread.
+      # user account associated with the calling thread and the host argument
+      # is ignored.
       #
       # Note that this does NOT create a new SID, but merely retrieves
       # information for an existing SID. To create a new SID, use the
@@ -184,6 +190,38 @@ module Win32
       #  Win32::Security::SID.new("\001\000\000\000\000\000\001\000\000\000\000")
       #
       def initialize(account=nil, host=Socket.gethostname)
+        if account.nil?
+          htoken = [0].pack('L')
+          bool   = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, htoken)
+          errno  = GetLastError()
+
+          if !bool
+            if errno == ERROR_NO_TOKEN
+              unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, htoken)
+                raise get_last_error
+              end
+            else
+              raise get_last_error(errno)
+            end
+          end
+
+          htoken = htoken.unpack('V').first
+          cbti = [0].pack('L')
+          token_info = 0.chr * 36
+
+          bool = GetTokenInformation(
+            htoken,
+            TokenOwner,
+            token_info,
+            token_info.size,
+            cbti
+          )
+
+          unless bool
+            raise Error, get_last_error
+          end
+        end
+
         bool   = false
         sid    = 0.chr * 28
         sid_cb = [sid.size].pack('L')
@@ -192,11 +230,25 @@ module Win32
         domain_cch = [domain_buf.size].pack('L')
 
         sid_name_use = 0.chr * 4
-        ordinal_val  = account[0]
-        ordinal_val  = ordinal_val.ord if RUBY_VERSION.to_f >= 1.9
 
-        # If characters in the 0-10 range, assume it's a binary SID.
-        if ordinal_val < 10
+        if account
+          ordinal_val = account[0]
+          ordinal_val = ordinal_val.ord if RUBY_VERSION.to_f >= 1.9
+        else
+          ordinal_val = nil
+        end
+
+        if ordinal_val.nil?
+          bool = LookupAccountSid(
+            nil,
+            token_info.unpack('L')[0],
+            sid,
+            sid_cb,
+            domain_buf,
+            domain_cch,
+            sid_name_use
+          )
+        elsif ordinal_val < 10 # Assume it's a binary SID.
           bool = LookupAccountSid(
             host,
             [account].pack('p*').unpack('L')[0],
@@ -222,8 +274,14 @@ module Win32
           raise Error, get_last_error
         end
 
-        # The arguments are flipped if the account argument is binary
-        if ordinal_val < 10
+        # The arguments are flipped depending on which path we took
+        if ordinal_val.nil?
+          buf = 0.chr * 260
+          ptr = token_info.unpack('L')[0]
+          memcpy(buf, ptr, token_info.size)
+          @sid = buf.strip
+          @account = sid.strip
+        elsif ordinal_val < 10
           @sid     = account
           @account = sid.strip
         else
