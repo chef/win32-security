@@ -1,6 +1,8 @@
-= 0.1.3 - ???
-* Refactored the Rakefile and added a default rake task.
-* Updates to the gemspec.
+= 0.1.3 - 12-Jul-2012
+* The SID.new method now defaults to the owner of the current thread if
+  no account name is provided.
+* Updates to the gemspec, Rakefile, and SID tests, including updates to
+  some of the gemspec dependencies.
 
 = 0.1.2 - 2-Aug-2009
 * Now compatible with Ruby 1.9.x.
