@@ -6,7 +6,7 @@
   require 'win32/security'
   include Win32
    
-  sid = Security::SID.open('djberge')
+  sid = Security::SID.open('some_user')
    
   sid.valid? # => true
   sid.to_s   # => "S-1-5-21-3733855671-1102023144-2002619019-1000"
@@ -16,8 +16,8 @@
 == Future Plans
   Create classes that encapsulate ACL's, ACE's, Token's, etc.
    
-  There are some unfinished versions of the ACL and ACE classes in CVS
-  if you're interested in taking a look.
+  There are some unfinished versions of the ACL and ACE classes in the
+  repo if you're interested in taking a look.
    
 == Known Issues
   None that I'm aware of. Please file any bug reports on the project page
@@ -27,7 +27,7 @@
   Artistic 2.0
     
 == Copyright
-  (C) 2003-2010 Daniel J. Berger
+  (C) 2003-2012 Daniel J. Berger
   All Rights Reserved
     
 == Authors

@@ -22,10 +22,25 @@ namespace :gem do
   end
 end
 
-Rake::TestTask.new do |t|
-  t.verbose = true
-  t.warning = true
-  t.test_files = Dir['test/test_sid.rb', 'test/test_security.rb']
+namespace :test do
+  Rake::TestTask.new(:security) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = Dir['test/test_security.rb']
+  end
+
+  Rake::TestTask.new(:sid) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = Dir['test/test_sid.rb']
+  end
+
+  # ACL class isn't ready yet
+  Rake::TestTask.new(:all) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = Dir['test/test_sid.rb', 'test/test_security.rb']
+  end
 end
 
-task :default => :test
+task :default => 'test:all'
