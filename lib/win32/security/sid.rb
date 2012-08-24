@@ -1,9 +1,5 @@
-require 'windows/security'
-require 'windows/thread'
-require 'windows/process'
-require 'windows/error'
-require 'windows/msvcrt/string'
-require 'windows/msvcrt/buffer'
+require File.join(File.dirname(__FILE__), 'windows', 'constants')
+require File.join(File.dirname(__FILE__), 'windows', 'functions')
 require 'socket'
 
 # The Win32 module serves as a namespace only.
@@ -14,23 +10,15 @@ module Win32
 
     # The SID class encapsulates a Security Identifier.
     class SID
-      include Windows::Security
-      include Windows::Error
-      include Windows::MSVCRT::String
-      include Windows::MSVCRT::Buffer
-      include Windows::Thread
-      include Windows::Process
-
-      extend Windows::Security
-      extend Windows::Error
-      extend Windows::MSVCRT::String
-      extend Windows::MSVCRT::Buffer
+      include Windows::Security::Constants
+      include Windows::Security::Functions
+      extend Windows::Security::Functions
 
       # Error class typically raised if any of the SID methods fail
       class Error < StandardError; end
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.1.3'
+      VERSION = '0.2.0'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -91,16 +79,13 @@ module Win32
       # Converts a binary SID to a string in S-R-I-S-S... format.
       #
       def self.sid_to_string(sid)
-        sid_addr = [sid].pack('p*').unpack('L')[0]
-        sid_buf  = 0.chr * 80
-        sid_ptr  = 0.chr * 4
+        str_buf = 0.chr * 80
 
-        unless ConvertSidToStringSid(sid_addr, sid_ptr)
-          raise Error, get_last_error
+        unless ConvertSidToStringSid(sid, str_buf)
+          raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
         end
 
-        strcpy(sid_buf, sid_ptr.unpack('L')[0])
-        sid_buf.strip
+        str_buf.strip
       end
 
       # Converts a string in S-R-I-S-S... format back to a binary SID.
@@ -191,45 +176,49 @@ module Win32
       #
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
-          htoken = [0].pack('L')
-          bool   = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, htoken)
+          htoken = FFI::MemoryPointer.new(:ulong)
+          bool   = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, htoken)
           errno  = GetLastError()
 
           if !bool
             if errno == ERROR_NO_TOKEN
               unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, htoken)
-                raise get_last_error
+                raise SystemCallError.new("OpenProcessToken", FFI.errno)
               end
             else
-              raise get_last_error(errno)
+              raise SystemCallError.new("OpenThreadToken", FFI.errno)
             end
           end
 
-          htoken = htoken.unpack('V').first
-          cbti = [0].pack('L')
-          token_info = 0.chr * 36
+          htoken = htoken.read_ulong
+          return_length = FFI::MemoryPointer.new(:ulong)
+          token_info = FFI::MemoryPointer.new(:pointer)
 
           bool = GetTokenInformation(
             htoken,
-            TokenOwner,
+            :TokenOwner,
             token_info,
             token_info.size,
-            cbti
+            return_length
           )
 
           unless bool
-            raise Error, get_last_error
+            raise SystemCallError.new("GetTokenInformation", FFI.errno)
           end
         end
 
-        bool   = false
-        sid    = 0.chr * 28
-        sid_cb = [sid.size].pack('L')
+        bool = false
 
-        domain_buf = 0.chr * 80
-        domain_cch = [domain_buf.size].pack('L')
+        sid = FFI::MemoryPointer.new(:char, 28)
+        domain = FFI::MemoryPointer.new(:char, 80)
 
-        sid_name_use = 0.chr * 4
+        sid_cb = FFI::MemoryPointer.new(:ulong)
+        sid_cb.write_ulong(sid.size)
+
+        domain_cch = FFI::MemoryPointer.new(:ulong)
+        domain_cch.write_ulong(domain.size)
+
+        sid_name_use = FFI::MemoryPointer.new(:int)
 
         if account
           ordinal_val = account[0]
@@ -241,20 +230,21 @@ module Win32
         if ordinal_val.nil?
           bool = LookupAccountSid(
             nil,
-            token_info.unpack('L')[0],
+            token_info,
             sid,
             sid_cb,
-            domain_buf,
+            domain,
             domain_cch,
             sid_name_use
           )
         elsif ordinal_val < 10 # Assume it's a binary SID.
+          account_ptr = FFI::MemoryPointer.from_string(account)
           bool = LookupAccountSid(
             host,
-            [account].pack('p*').unpack('L')[0],
+            account_ptr,
             sid,
             sid_cb,
-            domain_buf,
+            domain,
             domain_cch,
             sid_name_use
           )
@@ -264,35 +254,32 @@ module Win32
             account,
             sid,
             sid_cb,
-            domain_buf,
+            domain,
             domain_cch,
             sid_name_use
           )
         end
 
         unless bool
-          raise Error, get_last_error
+          raise SystemCallError.new("LookupAccountName", FFI.errno)
         end
 
         # The arguments are flipped depending on which path we took
         if ordinal_val.nil?
-          buf = 0.chr * 260
-          ptr = token_info.unpack('L')[0]
-          memcpy(buf, ptr, token_info.size)
-          @sid = buf.strip
-          @account = sid.strip
+          @sid = token_info.read_string
+          @account = sid.read_string(sid.size).strip
         elsif ordinal_val < 10
           @sid     = account
-          @account = sid.strip
+          @account = sid.read_string(sid.size).strip
         else
-          @sid     = sid.strip
+          @sid     = sid.read_string(sid.size).strip
           @account = account
         end
 
         @host   = host
-        @domain = domain_buf.strip
+        @domain = domain.read_string
 
-        @account_type = get_account_type(sid_name_use.unpack('L')[0])
+        @account_type = get_account_type(sid_name_use.read_ulong)
       end
 
       # Synonym for SID.new.
