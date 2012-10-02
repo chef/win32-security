@@ -106,18 +106,25 @@ module Win32
       # Converts a string in S-R-I-S-S... format back to a binary SID.
       #
       def self.string_to_sid(string)
-        sid_buf = 0.chr * 80
         string_addr = [string].pack('p*').unpack('L')[0]
+        sid_ptr  = 0.chr * 4
 
-        unless ConvertStringSidToSid(string_addr, sid_buf)
+        unless ConvertStringSidToSid(string_addr, sid_ptr)
           raise Error, get_last_error
         end
 
-        if RUBY_VERSION.to_f < 1.9
-          sid_buf.strip
-        else
-          sid_buf.force_encoding('ASCII-8BIT').strip
+        unless IsValidSid(sid_ptr.unpack('L')[0])
+          raise Error, get_last_error
         end
+
+        sid_len = GetLengthSid(sid_ptr.unpack('L')[0])
+        sid_buf = 0.chr * sid_len
+
+        unless CopySid(sid_len, [sid_buf].pack('p*').unpack('L')[0], sid_ptr.unpack('L')[0])
+          raise Error, get_last_error
+        end
+
+        sid_buf
       end
 
       # Creates a new SID with +authority+ and up to 8 +subauthorities+,

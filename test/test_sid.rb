@@ -59,6 +59,10 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_kind_of(String, Security::SID.string_to_sid(@sid.to_s))
   end
 
+  test "string/sid roundtrip works as expected" do
+    assert_true(Security::SID.new(Security::SID.string_to_sid('S-1-5-18')).to_s == 'S-1-5-18')
+  end
+
   test "to_s works as expected" do
     assert_respond_to(@sid, :to_s)
     assert_kind_of(String, @sid.to_s)
