@@ -30,7 +30,7 @@ module Win32
       class Error < StandardError; end
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.1.3'
+      VERSION = '0.1.4'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.

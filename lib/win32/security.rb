@@ -16,15 +16,15 @@ module Win32
     class Error < StandardError; end
 
     include Windows::Security
-      
+
     extend Windows::Process
     extend Windows::Security
     extend Windows::Handle
     extend Windows::Error
-      
+
     # The version of the win32-security library
-    VERSION = '0.1.3'
-      
+    VERSION = '0.1.4'
+
     # Returns whether or not the owner of the current process is running
     # with elevated security privileges.
     #
@@ -32,17 +32,17 @@ module Win32
     #
     def self.elevated_security?
       token = 0.chr * 4
-              
+
       unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
         raise Error, get_last_error
       end
-         
-      begin    
+
+      begin
         token = token.unpack('V')[0]
-            
+
         te = 0.chr * 4 # TOKEN_ELEVATION
         rl = 0.chr * 4 # Return length
-            
+
         bool = GetTokenInformation(
           token,
           TokenElevation,
@@ -50,12 +50,12 @@ module Win32
           te.size,
           rl
         )
-            
+
         raise Error, get_last_error unless bool
       ensure
         CloseHandle(token)
       end
-         
+
       # TokenIsElevated member of the TOKEN_ELEVATION struct
       te.unpack('L')[0] != 0
     end

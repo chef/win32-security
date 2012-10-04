@@ -17,9 +17,9 @@ class TC_Win32_Security < Test::Unit::TestCase
    def self.startup
       @@version = windows_version
    end
-   
+
    def test_version
-      assert_equal('0.1.3', Win32::Security::VERSION)
+      assert_equal('0.1.4', Win32::Security::VERSION)
    end
 
    def test_elevated_security
@@ -27,7 +27,7 @@ class TC_Win32_Security < Test::Unit::TestCase
       assert_respond_to(Win32::Security, :elevated_security?)
       assert_boolean(Win32::Security.elevated_security?)
    end
-   
+
    def self.shutdown
       @@version= nil
    end
