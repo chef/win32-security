@@ -4,15 +4,15 @@
 # Test suite for the Win32::Security::SID class. You should run these
 # tests via the 'rake test' task.
 ########################################################################
+require 'etc'
 require 'test-unit'
 require 'win32/security'
-require 'sys/admin'
 include Win32
 
 class TC_Win32_Security_Sid < Test::Unit::TestCase
   def self.startup
     @@host = Socket.gethostname
-    @@name = Sys::Admin.users[0].name
+    @@name = Etc.getlogin
   end
 
   def setup
@@ -20,7 +20,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "version is set to expected value" do
-    assert_equal('0.1.3', Security::SID::VERSION)
+    assert_equal('0.2.0', Security::SID::VERSION)
   end
 
   test "sid method basic functionality" do
@@ -54,6 +54,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_not_nil(Security::SID.sid_to_string(@sid.sid) =~ /\w+\-\w+/)
   end
 
+=begin
   test "string_to_sid works as expected" do
     assert_respond_to(Security::SID, :string_to_sid)
     assert_kind_of(String, Security::SID.string_to_sid(@sid.to_s))
@@ -125,6 +126,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_equal('S-1-5-32-545', Security::SID::BuiltinUsers)
     assert_equal('S-1-5-32-546', Security::SID::Guests)
   end
+=end
 
   def teardown
     @sid = nil
