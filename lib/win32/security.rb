@@ -16,6 +16,7 @@ module Win32
 
     include Windows::Security::Functions
     include Windows::Security::Constants
+    include Windows::Security::Structs
     extend Windows::Security::Functions
 
     # The version of the win32-security library
