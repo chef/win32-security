@@ -79,13 +79,13 @@ module Win32
       # Converts a binary SID to a string in S-R-I-S-S... format.
       #
       def self.sid_to_string(sid)
-        str_buf = 0.chr * 80
+        string_sid = FFI::MemoryPointer.new(:pointer)
 
-        unless ConvertSidToStringSid(sid, str_buf)
+        unless ConvertSidToStringSid(sid, string_sid)
           raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
         end
 
-        str_buf.strip
+        string_sid.read_pointer.read_string.strip
       end
 
       # Converts a string in S-R-I-S-S... format back to a binary SID.
@@ -127,7 +127,7 @@ module Win32
       #
       def self.create(authority, *sub_authorities)
         if sub_authorities.length > 8
-           raise ArgumentError, "maximum of 8 subauthorities allowed"
+          raise ArgumentError, "maximum of 8 subauthorities allowed"
         end
 
         sid = 0.chr * GetSidLengthRequired(sub_authorities.length)
