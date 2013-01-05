@@ -4,6 +4,10 @@ module Windows
       TOKEN_QUERY = 8
       ERROR_NO_TOKEN = 1008
 
+      SECURITY_NT_AUTHORITY = 5
+      SECURITY_BUILTIN_DOMAIN_RID = 0x00000020
+      DOMAIN_ALIAS_RID_ADMINS = 0x00000220
+
       SidTypeUser           = 1
       SidTypeGroup          = 2
       SidTypeDomain         = 3

@@ -1,6 +1,7 @@
 # This file allows users to require all security related classes from
 # a single file, instead of having to require individual files.
 
+require File.join(File.dirname(__FILE__), 'security', 'windows', 'constants')
 require File.join(File.dirname(__FILE__), 'security', 'windows', 'functions')
 
 # The Win32 module serves as a namespace only.
@@ -13,6 +14,7 @@ module Win32
     class Error < StandardError; end
 
     include Windows::Security::Functions
+    include Windows::Security::Constants
     extend Windows::Security::Functions
 
     # The version of the win32-security library
@@ -24,36 +26,79 @@ module Win32
     # Returns whether or not the owner of the current process is running
     # with elevated security privileges.
     #
-    # Only supported on Windows Vista or later.
+    # On Windows XP an earlier this method is actually just checking to
+    # see if the caller's process is a member of the local Administrator's
+    # group.
     #
     def self.elevated_security?
-      token = FFI::MemoryPointer.new(:ulong)
+      if windows_version < 6
+        sid_ptr     = FFI::MemoryPointer.new(:pointer)
+        nt_auth_ptr = FFI::MemoryPointer.new(SID_IDENTIFIER_AUTHORITY,1)
 
-      unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
-        raise SystemCallError.new("OpenProcessToken", FFI.errno)
-      end
+        nt_auth = SID_IDENTIFIER_AUTHORITY.new(nt_auth_ptr)
+        nt_auth[:Value].to_ptr.put_bytes(0, 0.chr*5 + 5.chr)
 
-      begin
-        token = token.read_ulong
-
-        # Since the TokenElevation struct only has 1 member, we use a pointer.
-        te = FFI::MemoryPointer.new(:ulong)
-        rl = FFI::MemoryPointer.new(:ulong)
-
-        bool = GetTokenInformation(
-          token,
-          :TokenElevation,
-          te,
-          te.size,
-          rl
+        bool = AllocateAndInitializeSid(
+          nt_auth_ptr,
+          2,
+          SECURITY_BUILTIN_DOMAIN_RID,
+          DOMAIN_ALIAS_RID_ADMINS,
+          0, 0, 0, 0, 0, 0,
+          sid_ptr
         )
+        unless bool
+          raise SystemCallError.new("AllocateAndInitializeSid", FFI.errno)
+        end
 
-        raise SystemCallError.new("GetTokenInformation", FFI.errno) unless bool
-      ensure
-        CloseHandle(token)
+        pbool = FFI::MemoryPointer.new(:long)
+
+        unless CheckTokenMembership(0, sid_ptr.read_pointer, pbool)
+          raise SystemCallError.new("CheckTokenMembership", FFI.errno)
+        end
+
+        pbool.read_long != 0
+      else
+        token = FFI::MemoryPointer.new(:ulong)
+
+        unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
+          raise SystemCallError.new("OpenProcessToken", FFI.errno)
+        end
+
+        begin
+          token = token.read_ulong
+
+          # Since the TokenElevation struct only has 1 member, we use a pointer.
+          te = FFI::MemoryPointer.new(:ulong)
+          rl = FFI::MemoryPointer.new(:ulong)
+
+          bool = GetTokenInformation(
+            token,
+            :TokenElevation,
+            te,
+            te.size,
+            rl
+          )
+
+          raise SystemCallError.new("GetTokenInformation", FFI.errno) unless bool
+        ensure
+          CloseHandle(token)
+        end
+
+        te.read_ulong != 0
+      end
+    end
+
+    private
+
+    def self.windows_version
+      ver = OSVERSIONINFO.new
+      ver[:dwOSVersionInfoSize] = ver.size
+
+      unless GetVersionExA(ver)
+        raise SystemCallError.new("GetVersionEx", FFI.errno)
       end
 
-      te.read_ulong != 0
+      ver[:dwMajorVersion]
     end
   end
 end

@@ -15,7 +15,22 @@ module Windows
 
       ffi_lib :kernel32
 
-      enum :token_information_class, [
+      class SID_IDENTIFIER_AUTHORITY < FFI::Struct
+        layout(:Value, [:char, 6])
+      end
+
+      class OSVERSIONINFO < FFI::Struct
+        layout(
+          :dwOSVersionInfoSize, :ulong,
+          :dwMajorVersion, :ulong,
+          :dwMinorVersion, :ulong,
+          :dwBuildNumber, :ulong,
+          :dwPlatformId, :ulong,
+          :szCSDVersion, [:char, 128]
+        )
+      end
+
+      enum :token_info_class, [
         :TokenUser, 1,
         :TokenGroups,
         :TokenPrivileges,
@@ -60,18 +75,21 @@ module Windows
       ]
 
       attach_pfunc :GetCurrentProcess, [], :ulong
+      attach_pfunc :GetVersionExA, [:pointer], :bool
       attach_pfunc :GetLastError, [], :ulong
       attach_pfunc :CloseHandle, [:ulong], :bool
 
       ffi_lib :advapi32
 
+      attach_pfunc :AllocateAndInitializeSid, [:pointer, :int, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :pointer], :bool
+      attach_pfunc :CheckTokenMembership, [:ulong, :pointer, :pointer], :bool
       attach_pfunc :ConvertSidToStringSid, :ConvertSidToStringSidA, [:pointer, :pointer], :bool
       attach_pfunc :ConvertStringSidToSid, :ConvertStringSidToSidA, [:string, :pointer], :bool
       attach_pfunc :EqualSid, [:pointer, :pointer], :bool
       attach_pfunc :GetLengthSid, [:pointer], :ulong
       attach_pfunc :GetSidLengthRequired, [:uint], :ulong
       attach_pfunc :GetSidSubAuthority, [:pointer, :ulong], :pointer
-      attach_pfunc :GetTokenInformation, [:ulong, :token_information_class, :pointer, :ulong, :pointer], :bool
+      attach_pfunc :GetTokenInformation, [:ulong, :token_info_class, :pointer, :ulong, :pointer], :bool
       attach_pfunc :InitializeSid, [:pointer, :pointer, :uint], :bool
       attach_pfunc :IsValidSid, [:pointer], :bool
       attach_pfunc :IsWellKnownSid, [:pointer, :int], :bool
