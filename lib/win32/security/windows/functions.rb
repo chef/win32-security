@@ -15,21 +15,6 @@ module Windows
 
       ffi_lib :kernel32
 
-      class SID_IDENTIFIER_AUTHORITY < FFI::Struct
-        layout(:Value, [:char, 6])
-      end
-
-      class OSVERSIONINFO < FFI::Struct
-        layout(
-          :dwOSVersionInfoSize, :ulong,
-          :dwMajorVersion, :ulong,
-          :dwMinorVersion, :ulong,
-          :dwBuildNumber, :ulong,
-          :dwPlatformId, :ulong,
-          :szCSDVersion, [:char, 128]
-        )
-      end
-
       enum :token_info_class, [
         :TokenUser, 1,
         :TokenGroups,
@@ -86,10 +71,12 @@ module Windows
       attach_pfunc :ConvertSidToStringSid, :ConvertSidToStringSidA, [:pointer, :pointer], :bool
       attach_pfunc :ConvertStringSidToSid, :ConvertStringSidToSidA, [:string, :pointer], :bool
       attach_pfunc :EqualSid, [:pointer, :pointer], :bool
+      attach_pfunc :GetAclInformation, [:pointer, :pointer, :ulong, :int], :bool
       attach_pfunc :GetLengthSid, [:pointer], :ulong
       attach_pfunc :GetSidLengthRequired, [:uint], :ulong
       attach_pfunc :GetSidSubAuthority, [:pointer, :ulong], :pointer
       attach_pfunc :GetTokenInformation, [:ulong, :token_info_class, :pointer, :ulong, :pointer], :bool
+      attach_pfunc :InitializeAcl, [:pointer, :ulong, :ulong], :bool
       attach_pfunc :InitializeSid, [:pointer, :pointer, :uint], :bool
       attach_pfunc :IsValidSid, [:pointer], :bool
       attach_pfunc :IsWellKnownSid, [:pointer, :int], :bool
