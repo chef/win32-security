@@ -2,6 +2,7 @@
 # a single file, instead of having to require individual files.
 
 require File.join(File.dirname(__FILE__), 'security', 'windows', 'constants')
+require File.join(File.dirname(__FILE__), 'security', 'windows', 'structs')
 require File.join(File.dirname(__FILE__), 'security', 'windows', 'functions')
 
 # The Win32 module serves as a namespace only.
