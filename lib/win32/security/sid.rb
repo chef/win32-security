@@ -85,24 +85,19 @@ module Win32
           raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
         end
 
-        string_sid.read_pointer.read_string.strip
+        string_sid.read_pointer.read_string
       end
 
       # Converts a string in S-R-I-S-S... format back to a binary SID.
       #
       def self.string_to_sid(string)
-        sid_buf = 0.chr * 80
-        string_addr = [string].pack('p*').unpack('L')[0]
+        sid = FFI::MemoryPointer.new(:pointer)
 
-        unless ConvertStringSidToSid(string_addr, sid_buf)
-          raise Error, get_last_error
+        unless ConvertStringSidToSid(string, sid)
+          raise SystemCallError.new("ConvertStringSidToSid", FFI.errno)
         end
 
-        if RUBY_VERSION.to_f < 1.9
-          sid_buf.strip
-        else
-          sid_buf.force_encoding('ASCII-8BIT').strip
-        end
+        sid.read_pointer.read_string
       end
 
       # Creates a new SID with +authority+ and up to 8 +subauthorities+,
@@ -130,18 +125,17 @@ module Win32
           raise ArgumentError, "maximum of 8 subauthorities allowed"
         end
 
-        sid = 0.chr * GetSidLengthRequired(sub_authorities.length)
-
-        auth = 0.chr * 5 + authority.chr
+        size = GetSidLengthRequired(sub_authorities.length)
+        sid  = FFI::MemoryPointer.new(:uchar, size)
+        auth = FFI::MemoryPointer.new(authority)
 
         unless InitializeSid(sid, auth, sub_authorities.length)
-           raise Error, get_last_error
+          raise SystemCallError.new("InitializeSid", FFI.errno)
         end
 
         sub_authorities.each_index do |i|
-           value = [sub_authorities[i]].pack('L')
-           auth_ptr = GetSidSubAuthority(sid, i)
-           memcpy(auth_ptr, value, 4)
+          ptr = GetSidSubAuthority(sid, i)
+          ptr.write_ulong(sub_authorities[i])
         end
 
         new(sid)
@@ -292,16 +286,13 @@ module Win32
       # storage or transmission.
       #
       def to_s
-        sid_addr = [@sid].pack('p*').unpack('L').first
-        sid_buf  = 0.chr * 80
-        sid_ptr  = 0.chr * 4
+        ptr = FFI::MemoryPointer.new(:pointer)
 
-        unless ConvertSidToStringSid(sid_addr, sid_ptr)
-          raise Error, get_last_error
+        unless ConvertSidToStringSid(@sid, ptr)
+          raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
         end
 
-        strcpy(sid_buf, sid_ptr.unpack('L').first)
-        sid_buf.strip
+        ptr.read_pointer.read_string
       end
 
       alias to_str to_s
