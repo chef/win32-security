@@ -60,6 +60,7 @@ module Windows
       ]
 
       attach_pfunc :GetCurrentProcess, [], :ulong
+      attach_pfunc :GetCurrentThread, [], :ulong
       attach_pfunc :GetVersionExA, [:pointer], :bool
       attach_pfunc :GetLastError, [], :ulong
       attach_pfunc :CloseHandle, [:ulong], :bool
