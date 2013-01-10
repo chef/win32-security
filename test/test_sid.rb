@@ -51,7 +51,6 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   test "sid_to_string works as expected" do
     assert_respond_to(Security::SID, :sid_to_string)
     assert_kind_of(String, Security::SID.sid_to_string(@sid.sid))
-    #p Security::SID.sid_to_string(@sid.sid)
     assert_not_nil(Security::SID.sid_to_string(@sid.sid) =~ /\w+\-\w+/)
   end
 
@@ -86,7 +85,6 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_true(@sid.length > 0)
   end
 
-=begin
   test "create method works as expected" do
     assert_respond_to(Security::SID, :create)
     assert_nothing_raised{
@@ -96,7 +94,6 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
       )
     }
   end
-=end
 
   test "constructor defaults to current account" do
     assert_nothing_raised{ @sid = Security::SID.new }
