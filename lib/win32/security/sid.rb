@@ -206,8 +206,6 @@ module Win32
           end
         end
 
-        bool = false
-
         if account
           ordinal_val = account[0]
           ordinal_val = ordinal_val.ord if RUBY_VERSION.to_f >= 1.9
