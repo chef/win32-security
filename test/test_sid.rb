@@ -51,10 +51,10 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   test "sid_to_string works as expected" do
     assert_respond_to(Security::SID, :sid_to_string)
     assert_kind_of(String, Security::SID.sid_to_string(@sid.sid))
+    #p Security::SID.sid_to_string(@sid.sid)
     assert_not_nil(Security::SID.sid_to_string(@sid.sid) =~ /\w+\-\w+/)
   end
 
-=begin
   test "string_to_sid works as expected" do
     assert_respond_to(Security::SID, :string_to_sid)
     assert_kind_of(String, Security::SID.string_to_sid(@sid.to_s))
@@ -86,6 +86,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_true(@sid.length > 0)
   end
 
+=begin
   test "create method works as expected" do
     assert_respond_to(Security::SID, :create)
     assert_nothing_raised{
@@ -95,10 +96,11 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
       )
     }
   end
+=end
 
   test "constructor defaults to current account" do
     assert_nothing_raised{ @sid = Security::SID.new }
-    assert_equal(Sys::Admin.get_login, @sid.account)
+    assert_equal(Etc.getlogin, @sid.account)
   end
 
   test "constructor accepts an account argument" do
@@ -114,7 +116,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "constructor raises an error if an invalid account is passed" do
-    assert_raise(Security::SID::Error){ Security::SID.new('bogus') }
+    assert_raise(SystemCallError){ Security::SID.new('bogus') }
   end
 
   test "well known sid constants are defined" do
@@ -126,7 +128,6 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_equal('S-1-5-32-545', Security::SID::BuiltinUsers)
     assert_equal('S-1-5-32-546', Security::SID::Guests)
   end
-=end
 
   def teardown
     @sid = nil

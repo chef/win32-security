@@ -170,49 +170,43 @@ module Win32
       #
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
-          htoken = FFI::MemoryPointer.new(:ulong)
-          bool   = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, htoken)
-          errno  = GetLastError()
+          begin
+            ptoken = FFI::MemoryPointer.new(:ulong)
 
-          if !bool
-            if errno == ERROR_NO_TOKEN
-              unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, htoken)
+            # Try the thread token first, default to the process token.
+            bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, ptoken)
+
+            if !bool && FFI.errno != ERROR_NO_TOKEN
+              raise SystemCallError.new("OpenThreadToken", FFI.errno)
+            else
+              ptoken = FFI::MemoryPointer.new(:ulong)
+              unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptoken)
                 raise SystemCallError.new("OpenProcessToken", FFI.errno)
               end
-            else
-              raise SystemCallError.new("OpenThreadToken", FFI.errno)
             end
-          end
 
-          htoken = htoken.read_ulong
-          return_length = FFI::MemoryPointer.new(:ulong)
-          token_info = FFI::MemoryPointer.new(:pointer)
+            token = ptoken.read_ulong
+            pinfo = FFI::MemoryPointer.new(:pointer)
+            plength = FFI::MemoryPointer.new(:ulong)
 
-          bool = GetTokenInformation(
-            htoken,
-            :TokenOwner,
-            token_info,
-            token_info.size,
-            return_length
-          )
+            # First pass, just get the size needed (1 is TokenOwner)
+            GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
 
-          unless bool
-            raise SystemCallError.new("GetTokenInformation", FFI.errno)
+            pinfo = FFI::MemoryPointer.new(plength.read_ulong)
+            plength = FFI::MemoryPointer.new(:ulong)
+
+            # Second pass, actual call (1 is TokenOwner)
+            unless GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
+              raise SystemCallError.new("GetTokenInformation", FFI.errno)
+            end
+
+            token_info = pinfo.read_pointer
+          ensure
+            CloseHandle(token) if token
           end
         end
 
         bool = false
-
-        sid = FFI::MemoryPointer.new(:char, 28)
-        domain = FFI::MemoryPointer.new(:char, 80)
-
-        sid_cb = FFI::MemoryPointer.new(:ulong)
-        sid_cb.write_ulong(sid.size)
-
-        domain_cch = FFI::MemoryPointer.new(:ulong)
-        domain_cch.write_ulong(domain.size)
-
-        sid_name_use = FFI::MemoryPointer.new(:int)
 
         if account
           ordinal_val = account[0]
@@ -221,41 +215,56 @@ module Win32
           ordinal_val = nil
         end
 
+        sid = FFI::MemoryPointer.new(:uchar, 260)
+        sid_size = FFI::MemoryPointer.new(:ulong)
+        sid_size.write_ulong(sid.size)
+
+        domain = FFI::MemoryPointer.new(:uchar, 260)
+        domain_size = FFI::MemoryPointer.new(:ulong)
+        domain_size.write_ulong(domain.size)
+
+        use_ptr = FFI::MemoryPointer.new(:ulong)
+
         if ordinal_val.nil?
           bool = LookupAccountSid(
             nil,
             token_info,
             sid,
-            sid_cb,
+            sid_size,
             domain,
-            domain_cch,
-            sid_name_use
+            domain_size,
+            use_ptr
           )
+          unless bool
+            raise SystemCallError.new("LookupAccountSid", FFI.errno)
+          end
         elsif ordinal_val < 10 # Assume it's a binary SID.
           account_ptr = FFI::MemoryPointer.from_string(account)
           bool = LookupAccountSid(
             host,
             account_ptr,
             sid,
-            sid_cb,
+            sid_length,
             domain,
-            domain_cch,
-            sid_name_use
+            domain_length,
+            use_ptr
           )
+          unless bool
+            raise SystemCallError.new("LookupAccountSid", FFI.errno)
+          end
         else
           bool = LookupAccountName(
             host,
             account,
             sid,
-            sid_cb,
+            sid_size,
             domain,
-            domain_cch,
-            sid_name_use
+            domain_size,
+            use_ptr,
           )
-        end
-
-        unless bool
-          raise SystemCallError.new("LookupAccountName", FFI.errno)
+          unless bool
+            raise SystemCallError.new("LookupAccountName", FFI.errno)
+          end
         end
 
         # The arguments are flipped depending on which path we took
@@ -273,7 +282,7 @@ module Win32
         @host   = host
         @domain = domain.read_string
 
-        @account_type = get_account_type(sid_name_use.read_ulong)
+        @account_type = get_account_type(use_ptr.read_ulong)
       end
 
       # Synonym for SID.new.
