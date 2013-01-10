@@ -7,9 +7,6 @@ module Windows
       ACL_REVISION = 2
       AclSizeInformation = 2
 
-      SECURITY_BUILTIN_DOMAIN_RID = 0x00000020
-      DOMAIN_ALIAS_RID_ADMINS = 0x00000220
-
       # Identifier Authorities
 
       SECURITY_NULL_SID_AUTHORITY         = 0
