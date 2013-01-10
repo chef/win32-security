@@ -16,9 +16,6 @@ module Win32
       include Windows::Security::Structs
       extend Windows::Security::Functions
 
-      # Error class typically raised if any of the SID methods fail
-      class Error < StandardError; end
-
       # The version of the Win32::Security::SID class.
       VERSION = '0.2.0'
 
@@ -142,7 +139,7 @@ module Win32
           ptr.write_ulong(sub_authorities[i])
         end
 
-        new(sid.read_string) # Pass a binary string
+        new(sid.read_string(size)) # Pass a binary string
       end
 
       # Creates and returns a new Win32::Security::SID object, based on
