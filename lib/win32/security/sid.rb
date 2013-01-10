@@ -1,5 +1,6 @@
 require File.join(File.dirname(__FILE__), 'windows', 'constants')
 require File.join(File.dirname(__FILE__), 'windows', 'functions')
+require File.join(File.dirname(__FILE__), 'windows', 'structs')
 require 'socket'
 
 # The Win32 module serves as a namespace only.
@@ -12,6 +13,7 @@ module Win32
     class SID
       include Windows::Security::Constants
       include Windows::Security::Functions
+      include Windows::Security::Structs
       extend Windows::Security::Functions
 
       # Error class typically raised if any of the SID methods fail
@@ -127,7 +129,9 @@ module Win32
 
         size = GetSidLengthRequired(sub_authorities.length)
         sid  = FFI::MemoryPointer.new(:uchar, size)
-        auth = FFI::MemoryPointer.new(authority)
+
+        auth = SID_IDENTIFIER_AUTHORITY.new
+        auth[:Value][5] = authority
 
         unless InitializeSid(sid, auth, sub_authorities.length)
           raise SystemCallError.new("InitializeSid", FFI.errno)
@@ -138,7 +142,7 @@ module Win32
           ptr.write_ulong(sub_authorities[i])
         end
 
-        new(sid)
+        new(sid.read_string) # Pass a binary string
       end
 
       # Creates and returns a new Win32::Security::SID object, based on
@@ -242,9 +246,9 @@ module Win32
             host,
             account_ptr,
             sid,
-            sid_length,
+            sid_size,
             domain,
-            domain_length,
+            domain_size,
             use_ptr
           )
           unless bool
