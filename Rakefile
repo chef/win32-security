@@ -29,6 +29,12 @@ namespace :test do
     t.test_files = Dir['test/test_security.rb']
   end
 
+  Rake::TestTask.new(:acl) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = Dir['test/test_acl.rb']
+  end
+
   Rake::TestTask.new(:sid) do |t|
     t.verbose = true
     t.warning = true
