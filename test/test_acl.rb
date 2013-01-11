@@ -57,6 +57,10 @@ class TC_Win32_Security_Acl < Test::Unit::TestCase
     assert_kind_of(Fixnum, @acl.find_ace)
   end
 
+  test "find_ace returns a sane value" do
+    assert_true(@acl.find_ace > 1000)
+  end
+
   test "revision getter basic functionality" do
     assert_respond_to(@acl, :revision)
     assert_kind_of(Fixnum, @acl.revision)

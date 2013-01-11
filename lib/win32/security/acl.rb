@@ -118,7 +118,7 @@ module Win32
           end
         end
 
-        pptr.read_pointer.read_ulong
+        pptr.read_pointer.address
       end
 
       # Sets the revision information level, where the +revision_level+
