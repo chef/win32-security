@@ -1,25 +1,24 @@
-require 'windows/security'
-require 'windows/error'
-require 'windows/limits'
-require 'windows/msvcrt/buffer'
+require File.join(File.dirname(__FILE__), 'windows', 'constants')
+require File.join(File.dirname(__FILE__), 'windows', 'structs')
+require File.join(File.dirname(__FILE__), 'windows', 'functions')
 
 # The Win32 module serves as a namespace only.
 module Win32
-   
+
   # The Security class serves as a toplevel class namespace.
   class Security
-      
+
     # The ACL class encapsulates an Access Control List.
     class ACL
-      include Windows::Error
-      include Windows::Security
-      include Windows::Limits
-      include Windows::MSVCRT::Buffer
-         
-      # The version of the Win32::Security::ACL class.
-      VERSION = '0.1.0'
+      include Windows::Security::Constants
+      include Windows::Security::Functions
+      include Windows::Security::Structs
+      extend Windows::Security::Functions
 
-      # The binary representation of the ACL structure
+      # The version of the Win32::Security::ACL class.
+      VERSION = '0.2.0'
+
+      # The underlying ACL structure.
       attr_reader :acl
 
       # The revision level.
@@ -30,10 +29,10 @@ module Win32
       # the ACL itself, and the revision information.
       #
       def initialize(revision = ACL_REVISION)
-        acl = 0.chr * 8 # This can be increased later as needed
+        acl = ACL_STRUCT.new
 
         unless InitializeAcl(acl, acl.size, revision)
-          raise Error, get_last_error
+          raise SystemCallError.new("InitializeAcl", FFI.errno)
         end
 
         @acl = acl
@@ -43,21 +42,22 @@ module Win32
       # Returns the number of ACE's in the ACL object.
       #
       def ace_count
-        buf = 0.chr * 12 # sizeof(ACL_SIZE_INFORMATION)
+        info = ACL_SIZE_INFORMATION.new
 
-        unless GetAclInformation(@acl, buf, buf.size, AclSizeInformation)
-          raise Error, get_last_error
+        unless GetAclInformation(@acl, info, info.size, AclSizeInformation)
+          raise SystemCallError.new("GetAclInformation", FFI.errno)
         end
 
-        buf[0, 4].unpack('L')[0]
+        info[:AceCount]
       end
 
       # Adds an access allowed ACE to the given +sid+. The +mask+ is a
       # bitwise OR'd value of access rights.
       #
+      # TODO: Move this into the SID class?
       def add_access_allowed_ace(sid, mask=0)
         unless AddAccessAllowedAce(@acl, @revision, mask, sid)
-          raise Error, get_last_error
+          raise SystemCallError.new("AddAccessAllowedAce", FFI.errno)
         end
       end
 
@@ -65,7 +65,7 @@ module Win32
       #
       def add_access_denied_ace(sid, mask=0)
         unless AddAccessDeniedAce(@acl, @revision, mask, sid)
-          raise Error, get_last_error
+          raise SystemCallError.new("AddAccessDeniedAce", FFI.errno)
         end
       end
 
@@ -79,7 +79,7 @@ module Win32
       #
       def add_ace(ace, index=MAXDWORD)
         unless AddAce(@acl, @revision, index, ace, ace.length)
-          raise Error, get_last_error
+          raise SystemCallError.new("AddAce", FFI.errno)
         end
 
         index
@@ -95,7 +95,7 @@ module Win32
       #
       def delete_ace(index=MAXDWORD)
         unless DeleteAce(@ace, index)
-          raise Error, get_last_error
+          raise SystemCallError.new("DeleteAce", FFI.errno)
         end
 
         index
@@ -106,19 +106,19 @@ module Win32
       # first free byte of the ACL is returned.
       #
       def find_ace(index = nil)
-        ptr = [0].pack('L')
+        pptr = FFI::MemoryPointer.new(:pointer)
 
         if index.nil?
-          unless FindFirstFreeAce(@acl, ptr)
-            raise Error, get_last_error
+          unless FindFirstFreeAce(@acl, pptr)
+            raise SystemCallError.new("DeleteAce", FFI.errno)
           end
         else
-          unless GetAce(@acl, index, ptr)
-            raise Error, get_last_error
+          unless GetAce(@acl, index, pptr)
+            raise SystemCallError.new("GetAce", FFI.errno)
           end
         end
 
-        [ptr].pack('p*').unpack('L')[0]
+        pptr.read_pointer.read_ulong
       end
 
       # Sets the revision information level, where the +revision_level+
@@ -127,10 +127,11 @@ module Win32
       # Returns the revision level if successful.
       #
       def revision=(revision_level)
-        buf = [revision_level].pack('L')
+        buf = FFI::MemoryPointer.new(:ulong)
+        buf.write_ulong(revision_level)
 
         unless SetAclInformation(@acl, buf, buf.size, AclRevisionInformation)
-          raise Error, get_last_error
+          raise SystemCallError.new("SetAclInformation", FFI.errno)
         end
 
         @revision = revision_level

@@ -67,11 +67,14 @@ module Windows
 
       ffi_lib :advapi32
 
-      attach_pfunc :AllocateAndInitializeSid, [:pointer, :int, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :pointer], :bool
+      attach_pfunc :AddAccessAllowedAce, [:pointer, :ulong, :ulong, :pointer], :bool
+      attach_pfunc :AllocateAndInitializeSid,
+        [:pointer, :int, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :ulong, :pointer], :bool
       attach_pfunc :CheckTokenMembership, [:ulong, :pointer, :pointer], :bool
       attach_pfunc :ConvertSidToStringSid, :ConvertSidToStringSidA, [:pointer, :pointer], :bool
       attach_pfunc :ConvertStringSidToSid, :ConvertStringSidToSidA, [:string, :pointer], :bool
       attach_pfunc :EqualSid, [:pointer, :pointer], :bool
+      attach_pfunc :FindFirstFreeAce, [:pointer, :pointer], :bool
       attach_pfunc :GetAclInformation, [:pointer, :pointer, :ulong, :int], :bool
       attach_pfunc :GetLengthSid, [:pointer], :ulong
       attach_pfunc :GetSidLengthRequired, [:uint], :ulong
@@ -79,12 +82,16 @@ module Windows
       attach_pfunc :GetTokenInformation, [:ulong, :token_info_class, :pointer, :ulong, :pointer], :bool
       attach_pfunc :InitializeAcl, [:pointer, :ulong, :ulong], :bool
       attach_pfunc :InitializeSid, [:pointer, :pointer, :uint], :bool
+      attach_pfunc :IsValidAcl, [:pointer], :bool
       attach_pfunc :IsValidSid, [:pointer], :bool
       attach_pfunc :IsWellKnownSid, [:pointer, :int], :bool
-      attach_pfunc :LookupAccountName, :LookupAccountNameA, [:string, :string, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
-      attach_pfunc :LookupAccountSid, :LookupAccountSidA, [:string, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
+      attach_pfunc :LookupAccountName, :LookupAccountNameA,
+        [:string, :string, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
+      attach_pfunc :LookupAccountSid, :LookupAccountSidA,
+        [:string, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
       attach_pfunc :OpenProcessToken, [:ulong, :ulong, :pointer], :bool
       attach_pfunc :OpenThreadToken, [:ulong, :ulong, :bool, :pointer], :bool
+      attach_pfunc :SetAclInformation, [:pointer, :pointer, :ulong, :int], :bool
     end
   end
 end

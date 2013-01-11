@@ -4,8 +4,18 @@ module Windows
       TOKEN_QUERY = 8
       ERROR_NO_TOKEN = 1008
 
-      ACL_REVISION = 2
-      AclSizeInformation = 2
+      # ACL Revisions
+
+      ACL_REVISION1 = 1
+      ACL_REVISION  = 2
+      ACL_REVISION2 = 2
+      ACL_REVISION3 = 3
+      ACL_REVISION4 = 4
+
+      # ACL Information Classes
+
+      AclRevisionInformation = 1
+      AclSizeInformation     = 2
 
       # Identifier Authorities
 
