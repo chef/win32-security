@@ -106,5 +106,5 @@ module Win32
 end
 
 require 'win32/security/sid'
-#require 'win32/security/acl'
+require 'win32/security/acl'
 #require 'win32/security/ace'
