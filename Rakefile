@@ -1,13 +1,11 @@
 require 'rake'
+require 'rake/clean'
 require 'rake/testtask'
 require 'rbconfig'
 
-namespace :gem do
-  desc "Remove any .gem files in the project"
-  task :clean do
-    Dir['*.gem'].each{ |f| File.delete(f) }
-  end
+CLEAN.include('**/*.gem', '**/*.rbc')
 
+namespace :gem do
   desc "Create the win32-security gem"
   task :create => [:clean] do
     spec = eval(IO.read('win32-security.gemspec'))
