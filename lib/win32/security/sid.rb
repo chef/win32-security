@@ -259,7 +259,7 @@ module Win32
             sid_size,
             domain,
             domain_size,
-            use_ptr,
+            use_ptr
           )
           unless bool
             raise SystemCallError.new("LookupAccountName", FFI.errno)
