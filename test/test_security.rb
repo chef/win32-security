@@ -9,7 +9,7 @@ require 'win32/security'
 
 class TC_Win32_Security < Test::Unit::TestCase
   test "version constant is set to expected value" do
-    assert_equal('0.2.1', Win32::Security::VERSION)
+    assert_equal('0.2.2', Win32::Security::VERSION)
   end
 
   test "elevated security basic functionality" do
