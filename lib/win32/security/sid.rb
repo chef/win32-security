@@ -274,7 +274,8 @@ module Win32
           @sid     = account
           @account = sid.read_string(sid.size).strip
         else
-          @sid     = sid.read_string(sid.size).strip
+          length = GetLengthSid(sid)
+          @sid     = sid.read_string(length)
           @account = account
         end
 
