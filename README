@@ -22,7 +22,13 @@
 == Known Issues
   None that I'm aware of. Please file any bug reports on the project page
   at http://www.rubyforge.org/projects/win32utils.
-    
+
+== Contributions
+  Although this library is free, please consider having your company
+  setup a gittip if used by your company professionally.
+
+  http://www.gittip.com/djberg96/
+
 == License
   Artistic 2.0
     
