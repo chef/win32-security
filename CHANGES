@@ -1,3 +1,7 @@
+== 0.2.3 - 27-Jun-2013
+* Fixed a bug where a sid could be inappropriately stripped. Thanks
+  go to Josh Cooper for the spot.
+
 == 0.2.2 - 8-Apr-2013
 * Fixed HANDLE prototypes in the underlying FFI code. This affected
   64 bit versions of Ruby.
