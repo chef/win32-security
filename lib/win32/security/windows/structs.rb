@@ -5,6 +5,8 @@ module Windows
     module Structs
       extend FFI::Library
 
+      private
+
       class SID_IDENTIFIER_AUTHORITY < FFI::Struct
         layout(:Value, [:char, 6])
       end

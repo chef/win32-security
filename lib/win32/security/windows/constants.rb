@@ -1,6 +1,8 @@
 module Windows
   module Security
     module Constants
+      private
+
       TOKEN_QUERY = 8
       ERROR_NO_TOKEN = 1008
 

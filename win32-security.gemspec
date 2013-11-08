@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-security'
-  spec.version    = '0.2.3'
+  spec.version    = '0.2.4'
   spec.authors    = ['Daniel J. Berger', 'Park Heesob']
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
@@ -16,6 +16,7 @@ Gem::Specification.new do |spec|
    
   spec.add_dependency('ffi')
 
+  spec.add_development_dependency('rake')
   spec.add_development_dependency('test-unit', '>= 2.5.0')
   spec.add_development_dependency('sys-admin', '>= 1.6.0')
    

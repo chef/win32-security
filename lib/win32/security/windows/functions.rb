@@ -5,12 +5,12 @@ module Windows
     module Functions
       extend FFI::Library
 
-      module FFI::Library
-        # Wrapper method for attach_function + private
-        def attach_pfunc(*args)
-          attach_function(*args)
-          private args[0]
-        end
+      private
+
+      # Wrapper method for attach_function + private
+      def self.attach_pfunc(*args)
+        attach_function(*args)
+        private args[0]
       end
 
       typedef :ulong, :dword

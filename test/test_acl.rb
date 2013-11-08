@@ -86,6 +86,10 @@ class TC_Win32_Security_Acl < Test::Unit::TestCase
     assert_true(@acl.valid?)
   end
 
+  test "ffi functions are private" do
+    assert_not_respond_to(@acl, :CloseHandle)
+  end
+
   def teardown
     @acl = nil
   end
