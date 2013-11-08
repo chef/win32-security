@@ -1,6 +1,7 @@
 == 0.2.4 - 8-Nov-2013
 * Added rake as a development dependency.
 * Attempted to make FFI related constants and structs more private.
+* Updated the gem:create task for Rubygems 2.
 
 == 0.2.3 - 27-Jun-2013
 * Fixed a bug where a sid could be inappropriately stripped. Thanks
