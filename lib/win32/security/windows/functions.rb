@@ -18,6 +18,7 @@ module Windows
       typedef :pointer, :ptr
 
       ffi_lib :kernel32
+      ffi_convention :stdcall
 
       enum :token_info_class, [
         :TokenUser, 1,
