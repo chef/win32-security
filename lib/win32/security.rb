@@ -60,14 +60,14 @@ module Win32
 
         pbool.read_long != 0
       else
-        token = FFI::MemoryPointer.new(:ulong)
+        token = FFI::MemoryPointer.new(:uintptr_t)
 
         unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
           raise SystemCallError.new("OpenProcessToken", FFI.errno)
         end
 
         begin
-          token = token.read_ulong
+          token = token.read_pointer.to_i
 
           # Since the TokenElevation struct only has 1 member, we use a pointer.
           te = FFI::MemoryPointer.new(:ulong)
