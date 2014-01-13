@@ -172,7 +172,7 @@ module Win32
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
           begin
-            ptoken = FFI::MemoryPointer.new(:ulong)
+            ptoken = FFI::MemoryPointer.new(:uintptr_t)
 
             # Try the thread token first, default to the process token.
             bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, ptoken)
@@ -180,13 +180,13 @@ module Win32
             if !bool && FFI.errno != ERROR_NO_TOKEN
               raise SystemCallError.new("OpenThreadToken", FFI.errno)
             else
-              ptoken = FFI::MemoryPointer.new(:ulong)
+              ptoken = FFI::MemoryPointer.new(:uintptr_t)
               unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptoken)
                 raise SystemCallError.new("OpenProcessToken", FFI.errno)
               end
             end
 
-            token = ptoken.read_ulong
+            token = ptoken.read_pointer.to_i
             pinfo = FFI::MemoryPointer.new(:pointer)
             plength = FFI::MemoryPointer.new(:ulong)
 
