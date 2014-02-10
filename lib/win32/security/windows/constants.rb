@@ -118,6 +118,10 @@ module Windows
       SidTypeInvalid        = 7
       SidTypeUnknown        = 8
       SidTypeComputer       = 9
+
+      # SDDL version information
+
+      SDDL_REVISION_1 = 1
     end
   end
 end
