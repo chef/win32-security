@@ -64,6 +64,14 @@ module Windows
           :AceBytesFree, :ulong
         )
       end
+
+      class SECURITY_ATTRIBUTES < FFI::Struct
+        layout(
+          :nLength, :ulong,
+          :lpSecurityDescriptor, :ulong,
+          :bInheritHandle, :bool
+        )
+      end
     end
   end
 end
