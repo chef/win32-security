@@ -1,9 +1,9 @@
 # The Win32 module serves as a namespace only.
 module Win32
-   
+
   # The Security class serves as a toplevel class namespace.
   class Security
-      
+
     # The ACE class encapsulates an Access Control Entry, an element within
     # an Access Control List.
     class ACE
@@ -16,7 +16,7 @@ module Win32
       # The ACE mask, e.g. INHERITED_ACE
       attr_accessor :ace_mask
 
-      # Standard access rights, e.g. GENERIC_READ, GENERIC_WRITE, etc 
+      # Standard access rights, e.g. GENERIC_READ, GENERIC_WRITE, etc
       attr_accessor :access_mask
 
       # Bit flags that indicate whether the ObjectType and
@@ -26,12 +26,16 @@ module Win32
       attr_reader :flags
 
       # A Win32::Security::GUID object that identifies the type of child
-      # object that can inherit the ACE. 
+      # object that can inherit the ACE.
       attr_accessor :object_type
 
       attr_accessor :inherited_object_type
 
-      def initialize
+      def initialize(sid, access_mask, ace_type, flags)
+        @sid = sid
+        @access_mask = access_mask
+        @ace_type = ace_type
+        @flags = flags
         yield self if block_given?
       end
     end
