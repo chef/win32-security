@@ -73,9 +73,10 @@ module Windows
       ffi_lib :advapi32
 
       attach_pfunc :AddAccessAllowedAce, [:ptr, :dword, :dword, :ptr], :bool
-      attach_pfunc :AllocateAndInitializeSid,
-        [:ptr, :int, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :ptr], :bool
+      attach_pfunc :AllocateAndInitializeSid, [:ptr, :int, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :ptr], :bool
       attach_pfunc :CheckTokenMembership, [:handle, :ptr, :ptr], :bool
+      attach_pfunc :ConvertSecurityDescriptorToStringSecurityDescriptor, [:ptr, :dword, :dword, :ptr, :ptr], :bool
+      attach_pfunc :ConvertStringSecurityDescriptorToSecurityDescriptor, :ConvertStringSecurityDescriptorToSecurityDescriptorA, [:string, :dword, :ptr, :ptr], :bool
       attach_pfunc :ConvertSidToStringSid, :ConvertSidToStringSidA, [:ptr, :ptr], :bool
       attach_pfunc :ConvertStringSidToSid, :ConvertStringSidToSidA, [:string, :ptr], :bool
       attach_pfunc :EqualSid, [:ptr, :ptr], :bool
@@ -90,10 +91,8 @@ module Windows
       attach_pfunc :IsValidAcl, [:ptr], :bool
       attach_pfunc :IsValidSid, [:ptr], :bool
       attach_pfunc :IsWellKnownSid, [:ptr, :int], :bool
-      attach_pfunc :LookupAccountName, :LookupAccountNameA,
-        [:string, :string, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
-      attach_pfunc :LookupAccountSid, :LookupAccountSidA,
-        [:string, :ptr, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
+      attach_pfunc :LookupAccountName, :LookupAccountNameA, [:string, :string, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
+      attach_pfunc :LookupAccountSid, :LookupAccountSidA, [:string, :ptr, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
       attach_pfunc :OpenProcessToken, [:handle, :dword, :ptr], :bool
       attach_pfunc :OpenThreadToken, [:handle, :dword, :bool, :ptr], :bool
       attach_pfunc :SetAclInformation, [:ptr, :ptr, :dword, :int], :bool
