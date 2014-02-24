@@ -17,7 +17,7 @@ module Win32
       extend Windows::Security::Functions
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.2.0'
+      VERSION = '0.2.1'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -96,7 +96,9 @@ module Win32
           raise SystemCallError.new("ConvertStringSidToSid", FFI.errno)
         end
 
-        sid.read_pointer.read_string
+        ptr = sid.read_pointer
+
+        ptr.read_bytes(GetLengthSid(ptr))
       end
 
       # Creates a new SID with +authority+ and up to 8 +subauthorities+,
