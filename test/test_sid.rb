@@ -59,6 +59,11 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_kind_of(String, Security::SID.string_to_sid(@sid.to_s))
   end
 
+  test "we can convert back and forth between a sid and a string" do
+    str = Security::SID.sid_to_string(@sid.sid)
+    assert_equal(@sid.sid, Security::SID.string_to_sid(str))
+  end
+
   test "to_s works as expected" do
     assert_respond_to(@sid, :to_s)
     assert_kind_of(String, @sid.to_s)
