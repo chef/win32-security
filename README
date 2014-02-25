@@ -20,8 +20,9 @@
   repo if you're interested in taking a look.
    
 == Known Issues
-  None that I'm aware of. Please file any bug reports on the project page
-  at http://www.rubyforge.org/projects/win32utils.
+  None that I'm aware of. Please file any bug reports on the project page at:
+
+  https://github.com/djberg96/win32-security
 
 == Contributions
   Although this library is free, please consider having your company
@@ -33,7 +34,7 @@
   Artistic 2.0
     
 == Copyright
-  (C) 2003-2013 Daniel J. Berger
+  (C) 2003-2014 Daniel J. Berger
   All Rights Reserved
     
 == Authors
