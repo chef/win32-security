@@ -1,6 +1,7 @@
-require File.join(File.dirname(__FILE__), 'windows', 'constants')
-require File.join(File.dirname(__FILE__), 'windows', 'structs')
-require File.join(File.dirname(__FILE__), 'windows', 'functions')
+require_relative 'windows/constants'
+require_relative 'windows/structs'
+require_relative 'windows/functions'
+require_relative 'sid'
 
 # The Win32 module serves as a namespace only.
 module Win32
@@ -28,10 +29,10 @@ module Win32
       # encapsulates an ACL structure, including a binary representation of
       # the ACL itself, and the revision information.
       #
-      def initialize(revision = ACL_REVISION)
+      def initialize(size = 1024, revision = ACL_REVISION)
         acl = ACL_STRUCT.new
 
-        unless InitializeAcl(acl, acl.size, revision)
+        unless InitializeAcl(acl, size, revision)
           raise SystemCallError.new("InitializeAcl", FFI.errno)
         end
 
@@ -51,14 +52,29 @@ module Win32
         info[:AceCount]
       end
 
-      # Adds an access allowed ACE to the given +sid+. The +mask+ is a
-      # bitwise OR'd value of access rights.
+      # Adds an access allowed ACE to the given +sid+, which can be a
+      # Win32::Security::SID object or a plain user or group name. If no
+      # sid is provided then the owner of the current process is used.
       #
-      # TODO: Move this into the SID class?
-      def add_access_allowed_ace(sid, mask=0)
+      # The +mask+ is a bitwise OR'd value of access rights.
+      #
+      # Example:
+      #
+      #   acl = Win32::Security::ACL.new
+      #   acl.add_access_allowed_ace('djberge', GENERIC_READ | GENERIC_WRITE)
+      #
+      def add_access_allowed_ace(sid=nil, mask=0)
+        if sid.is_a?(Win32::Security::SID)
+          sid = sid.sid
+        else
+          sid = Win32::Security::SID.new(sid).sid
+        end
+
         unless AddAccessAllowedAce(@acl, @revision, mask, sid)
           raise SystemCallError.new("AddAccessAllowedAce", FFI.errno)
         end
+
+        sid
       end
 
       # Adds an access denied ACE to the given +sid+.
@@ -146,4 +162,15 @@ module Win32
       end
     end
   end
+end
+
+if $0 == __FILE__
+  include Win32
+  acl = Security::ACL.new
+  #p acl.ace_count
+  acl.add_access_allowed_ace(
+    'postgres',
+    Security::ACL::GENERIC_READ | Security::ACL::GENERIC_WRITE
+  )
+  #p acl.ace_count
 end
