@@ -72,14 +72,17 @@ module Windows
 
       ffi_lib :advapi32
 
+      attach_pfunc :AddAce, [:ptr, :dword, :dword, :ptr, :dword], :bool
       attach_pfunc :AddAccessAllowedAce, [:ptr, :dword, :dword, :ptr], :bool
       attach_pfunc :AddAccessDeniedAce, [:ptr, :dword, :dword, :ptr], :bool
       attach_pfunc :AllocateAndInitializeSid, [:ptr, :int, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :ptr], :bool
       attach_pfunc :CheckTokenMembership, [:handle, :ptr, :ptr], :bool
       attach_pfunc :ConvertSidToStringSid, :ConvertSidToStringSidA, [:ptr, :ptr], :bool
       attach_pfunc :ConvertStringSidToSid, :ConvertStringSidToSidA, [:string, :ptr], :bool
+      attach_pfunc :DeleteAce, [:ptr, :dword], :bool
       attach_pfunc :EqualSid, [:ptr, :ptr], :bool
       attach_pfunc :FindFirstFreeAce, [:ptr, :ptr], :bool
+      attach_pfunc :GetAce, [:ptr, :dword, :ptr], :bool
       attach_pfunc :GetAclInformation, [:ptr, :ptr, :dword, :int], :bool
       attach_pfunc :GetLengthSid, [:ptr], :dword
       attach_pfunc :GetSidLengthRequired, [:uint], :dword
