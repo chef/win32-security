@@ -75,8 +75,6 @@ module Windows
       attach_pfunc :AddAccessAllowedAce, [:ptr, :dword, :dword, :ptr], :bool
       attach_pfunc :AllocateAndInitializeSid, [:ptr, :int, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :dword, :ptr], :bool
       attach_pfunc :CheckTokenMembership, [:handle, :ptr, :ptr], :bool
-      attach_pfunc :ConvertSecurityDescriptorToStringSecurityDescriptor, [:ptr, :dword, :dword, :ptr, :ptr], :bool
-      attach_pfunc :ConvertStringSecurityDescriptorToSecurityDescriptor, :ConvertStringSecurityDescriptorToSecurityDescriptorA, [:string, :dword, :ptr, :ptr], :bool
       attach_pfunc :ConvertSidToStringSid, :ConvertSidToStringSidA, [:ptr, :ptr], :bool
       attach_pfunc :ConvertStringSidToSid, :ConvertStringSidToSidA, [:string, :ptr], :bool
       attach_pfunc :EqualSid, [:ptr, :ptr], :bool
@@ -96,6 +94,13 @@ module Windows
       attach_pfunc :OpenProcessToken, [:handle, :dword, :ptr], :bool
       attach_pfunc :OpenThreadToken, [:handle, :dword, :bool, :ptr], :bool
       attach_pfunc :SetAclInformation, [:ptr, :ptr, :dword, :int], :bool
+
+      begin
+        attach_pfunc :ConvertSecurityDescriptorToStringSecurityDescriptor, [:ptr, :dword, :dword, :ptr, :ptr], :bool
+        attach_pfunc :ConvertStringSecurityDescriptorToSecurityDescriptor, :ConvertStringSecurityDescriptorToSecurityDescriptorA, [:string, :dword, :ptr, :ptr], :bool
+      rescue FFI::NotFoundError
+        # Doesn't seem these are exported
+      end
     end
   end
 end
