@@ -100,8 +100,7 @@ module Win32
       #
       # Returns the index if successful.
       #--
-      # This is untested and will require an actual implementation of
-      # Win32::Security::Ace before it can work properly.
+      # This won't work until we implement the ACE class.
       #
       def add_ace(ace, index=MAXDWORD)
         unless AddAce(@acl, @revision, index, ace, ace.length)
@@ -115,12 +114,9 @@ module Win32
       # the chain if no index is specified.
       #
       # Returns the index if successful.
-      #--
-      # This is untested and will require an actual implementation of
-      # Win32::Security::Ace before it can work properly.
       #
       def delete_ace(index=MAXDWORD)
-        unless DeleteAce(@ace, index)
+        unless DeleteAce(@acl, index)
           raise SystemCallError.new("DeleteAce", FFI.errno)
         end
 
@@ -130,6 +126,8 @@ module Win32
       # Finds and returns a pointer to an ACE in the ACL at the given
       # +index+. If no index is provided, then a pointer to the first
       # free byte of the ACL is returned.
+      #--
+      # I will probably have this return an ACE object.
       #
       def find_ace(index = nil)
         pptr = FFI::MemoryPointer.new(:pointer)
@@ -186,5 +184,8 @@ if $0 == __FILE__
     'postgres',
     Security::ACL::GENERIC_READ | Security::ACL::GENERIC_WRITE
   )
+  p acl.ace_count
+  p acl.find_ace
+  acl.delete_ace
   p acl.ace_count
 end
