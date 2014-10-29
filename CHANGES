@@ -1,3 +1,7 @@
+== 0.2.5 - 24-Feb-2014
+* Fixed a bug in the SID#string_to_sid method. Thanks go to Rob Reynolds
+  for the spot.
+
 == 0.2.4 - 8-Nov-2013
 * Added rake as a development dependency.
 * Attempted to make FFI related constants and structs more private.

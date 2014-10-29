@@ -20,7 +20,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "version is set to expected value" do
-    assert_equal('0.2.0', Security::SID::VERSION)
+    assert_equal('0.2.1', Security::SID::VERSION)
   end
 
   test "sid method basic functionality" do
@@ -57,6 +57,11 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   test "string_to_sid works as expected" do
     assert_respond_to(Security::SID, :string_to_sid)
     assert_kind_of(String, Security::SID.string_to_sid(@sid.to_s))
+  end
+
+  test "we can convert back and forth between a sid and a string" do
+    str = Security::SID.sid_to_string(@sid.sid)
+    assert_equal(@sid.sid, Security::SID.string_to_sid(str))
   end
 
   test "to_s works as expected" do
