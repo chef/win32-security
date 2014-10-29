@@ -5,6 +5,7 @@ module Windows
 
       TOKEN_QUERY = 8
       ERROR_NO_TOKEN = 1008
+      MAXDWORD = 0xFFFFFFFF
 
       # ACL Revisions
 
