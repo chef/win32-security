@@ -1,6 +1,6 @@
-require File.join(File.dirname(__FILE__), 'windows', 'constants')
-require File.join(File.dirname(__FILE__), 'windows', 'functions')
-require File.join(File.dirname(__FILE__), 'windows', 'structs')
+require_relative 'windows/constants'
+require_relative 'windows/functions'
+require_relative 'windows/structs'
 require 'socket'
 
 # The Win32 module serves as a namespace only.
@@ -271,11 +271,11 @@ module Win32
           @sid = token_info.read_string
           @account = sid.read_string(sid.size).strip
         elsif ordinal_val < 10
-          @sid     = account
+          @sid = account
           @account = sid.read_string(sid.size).strip
         else
           length = GetLengthSid(sid)
-          @sid     = sid.read_string(length)
+          @sid = sid.read_string(length)
           @account = account
         end
 
