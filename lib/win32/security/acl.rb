@@ -77,9 +77,19 @@ module Win32
         sid
       end
 
-      # Adds an access denied ACE to the given +sid+.
+      # Adds an access denied ACE to the given +sid+, which can be a
+      # Win32::Security::SID object ora plain user or group name. If
+      # no sid is provided then the owner of the current process is used.
       #
-      def add_access_denied_ace(sid, mask=0)
+      # The +mask+ is the bitwise OR'd value of access rights.
+      #
+      def add_access_denied_ace(sid = nil, mask=0)
+        if sid.is_a?(Win32::Security::SID)
+          sid = sid.sid
+        else
+          sid = Win32::Security::SID.new(sid).sid
+        end
+
         unless AddAccessDeniedAce(@acl, @revision, mask, sid)
           raise SystemCallError.new("AddAccessDeniedAce", FFI.errno)
         end
@@ -117,9 +127,9 @@ module Win32
         index
       end
 
-      # Finds and returns a pointer (address) to an ACE in the ACL at the
-      # given +index+. If no index is provided, then an address to the
-      # first free byte of the ACL is returned.
+      # Finds and returns a pointer to an ACE in the ACL at the given
+      # +index+. If no index is provided, then a pointer to the first
+      # free byte of the ACL is returned.
       #
       def find_ace(index = nil)
         pptr = FFI::MemoryPointer.new(:pointer)
@@ -134,7 +144,7 @@ module Win32
           end
         end
 
-        pptr.read_pointer.address
+        pptr.read_pointer
       end
 
       # Sets the revision information level, where the +revision_level+
@@ -167,10 +177,14 @@ end
 if $0 == __FILE__
   include Win32
   acl = Security::ACL.new
-  #p acl.ace_count
+  p acl.ace_count
+  acl.add_access_denied_ace(
+    'postgres',
+    Security::ACL::GENERIC_EXECUTE
+  )
   acl.add_access_allowed_ace(
     'postgres',
     Security::ACL::GENERIC_READ | Security::ACL::GENERIC_WRITE
   )
-  #p acl.ace_count
+  p acl.ace_count
 end
