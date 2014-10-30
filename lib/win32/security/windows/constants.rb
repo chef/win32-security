@@ -124,6 +124,14 @@ module Windows
 
       SDDL_REVISION_1 = 1
 
+      # ACE flags
+
+      OBJECT_INHERIT_ACE                      = 0x1
+      CONTAINER_INHERIT_ACE                   = 0x2
+      NO_PROPAGATE_INHERIT_ACE                = 0x4
+      INHERIT_ONLY_ACE                        = 0x8
+      INHERITED_ACE                           = 0x10
+
       # Standard Access Rights
 
       DELETE                       = 0x00010000
