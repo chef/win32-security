@@ -37,6 +37,45 @@ module Win32
         @flags = flags
         yield self if block_given?
       end
+
+      def ace_type_string
+        case @ace_type
+          when 0x0
+            'ACCESS_ALLOWED_ACE_TYPE'
+          when 0x1
+            'ACCESS_DENIED_ACE_TYPE'
+          when 0x2
+            'SYSTEM_AUDIT_ACE_TYPE'
+          when 0x3
+            'SYSTEM_ALARM_ACE_TYPE'
+          when 0x4
+            'ACCESS_ALLOWED_COMPOUND_ACE_TYPE'
+          when 0x5
+            'ACCESS_ALLOWED_OBJECT_ACE_TYPE'
+          when 0x6
+            'ACCESS_DENIED_OBJECT_ACE_TYPE'
+          when 0x7
+            'SYSTEM_AUDIT_OBJECT_ACE_TYPE'
+          when 0x8
+            'SYSTEM_ALARM_OBJECT_ACE_TYPE'
+          when 0x9
+            'ACCESS_ALLOWED_CALLBACK_ACE_TYPE'
+          when 0xA
+            'ACCESS_DENIED_CALLBACK_ACE_TYPE'
+          when 0xB
+            'ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE'
+          when 0xC
+            'ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE'
+          when 0xD
+            'SYSTEM_AUDIT_CALLBACK_ACE_TYPE'
+          when 0xE
+            'SYSTEM_ALARM_CALLBACK_ACE_TYPE'
+          when 0xF
+            'SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE'
+          when 0x10
+            'SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE'
+        end
+      end
     end
   end
 end
