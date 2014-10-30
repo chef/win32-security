@@ -1,9 +1,9 @@
 # This file allows users to require all security related classes from
 # a single file, instead of having to require individual files.
 
-require File.join(File.dirname(__FILE__), 'security', 'windows', 'constants')
-require File.join(File.dirname(__FILE__), 'security', 'windows', 'structs')
-require File.join(File.dirname(__FILE__), 'security', 'windows', 'functions')
+require_relative 'security/windows/constants'
+require_relative 'security/windows/structs'
+require_relative 'security/windows/functions'
 
 # The Win32 module serves as a namespace only.
 module Win32
@@ -20,7 +20,7 @@ module Win32
     extend Windows::Security::Functions
 
     # The version of the win32-security library
-    VERSION = '0.2.5'
+    VERSION = '0.3.0'
 
     # Used by OpenProcessToken
     TOKEN_QUERY = 8
