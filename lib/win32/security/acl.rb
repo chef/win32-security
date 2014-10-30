@@ -61,17 +61,23 @@ module Win32
       # Example:
       #
       #   acl = Win32::Security::ACL.new
-      #   acl.add_access_allowed_ace('djberge', GENERIC_READ | GENERIC_WRITE)
+      #   acl.add_access_allowed_ace('some_user', GENERIC_READ | GENERIC_WRITE)
       #
-      def add_access_allowed_ace(sid=nil, mask=0)
+      def add_access_allowed_ace(sid=nil, mask=0, flags=nil)
         if sid.is_a?(Win32::Security::SID)
           sid = sid.sid
         else
           sid = Win32::Security::SID.new(sid).sid
         end
 
-        unless AddAccessAllowedAce(@acl, @revision, mask, sid)
-          raise SystemCallError.new("AddAccessAllowedAce", FFI.errno)
+        if flags
+          unless AddAccessAllowedAceEx(@acl, @revision, flags, mask, sid)
+            raise SystemCallError.new("AddAccessAllowedAceEx", FFI.errno)
+          end
+        else
+          unless AddAccessAllowedAce(@acl, @revision, mask, sid)
+            raise SystemCallError.new("AddAccessAllowedAce", FFI.errno)
+          end
         end
 
         sid
@@ -83,15 +89,21 @@ module Win32
       #
       # The +mask+ is the bitwise OR'd value of access rights.
       #
-      def add_access_denied_ace(sid = nil, mask=0)
+      def add_access_denied_ace(sid=nil, mask=0, flags=nil)
         if sid.is_a?(Win32::Security::SID)
           sid = sid.sid
         else
           sid = Win32::Security::SID.new(sid).sid
         end
 
-        unless AddAccessDeniedAce(@acl, @revision, mask, sid)
-          raise SystemCallError.new("AddAccessDeniedAce", FFI.errno)
+        if flags
+          unless AddAccessDeniedAceEx(@acl, @revision, flags, mask, sid)
+            raise SystemCallError.new("AddAccessDeniedAceEx", FFI.errno)
+          end
+        else
+          unless AddAccessDeniedAce(@acl, @revision, mask, sid)
+            raise SystemCallError.new("AddAccessDeniedAce", FFI.errno)
+          end
         end
       end
 
