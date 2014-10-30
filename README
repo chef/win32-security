@@ -1,6 +1,7 @@
 = Description
   A security library for MS Windows that allows you to open existing or
-  create new security identifiers (SID's).
+  create new security identifiers (SID's), as well as create access
+  control lists (ACL's).
 
 = Synopsis
   require 'win32/security'
@@ -12,12 +13,21 @@
   sid.to_s   # => "S-1-5-21-3733855671-1102023144-2002619019-1000"
   sid.length # => 28
   sid.sid    # => "\001\005\000\000\000\000\000\005\025\000\000\000..."
+
+  acl = Security::ACL.new
+  mask = Security::ACL::GENERIC_READ | Security::ACL::GENERIC_WRITE
+
+  acl.add_access_allowed_ace('some_user', mask)
+  acl.add_access_denied_ace('some_user', Security::ACL::GENERIC_EXECUTE)
+
+  acl.acl_count # => 2
+  acl.valid?    # => true
    
 == Future Plans
-  Create classes that encapsulate ACL's, ACE's, Token's, etc.
+  Create classes that encapsulate ACE's and Tokens.
    
-  There are some unfinished versions of the ACL and ACE classes in the
-  repo if you're interested in taking a look.
+  There is an unfinished versions of the ACE class in the repo if you're
+  interested in taking a look.
    
 == Known Issues
   None that I'm aware of. Please file any bug reports on the project page at:
