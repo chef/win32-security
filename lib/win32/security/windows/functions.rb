@@ -101,12 +101,10 @@ module Windows
       attach_pfunc :OpenThreadToken, [:handle, :dword, :bool, :ptr], :bool
       attach_pfunc :SetAclInformation, [:ptr, :ptr, :dword, :int], :bool
 
-      begin
-        attach_pfunc :ConvertSecurityDescriptorToStringSecurityDescriptor, [:ptr, :dword, :dword, :ptr, :ptr], :bool
-        attach_pfunc :ConvertStringSecurityDescriptorToSecurityDescriptor, :ConvertStringSecurityDescriptorToSecurityDescriptorA, [:string, :dword, :ptr, :ptr], :bool
-      rescue FFI::NotFoundError
-        # Doesn't seem these are exported
-      end
+      attach_pfunc :ConvertSecurityDescriptorToStringSecurityDescriptor,
+        :ConvertSecurityDescriptorToStringSecurityDescriptorA, [:ptr, :dword, :dword, :ptr, :ptr], :bool
+      attach_pfunc :ConvertStringSecurityDescriptorToSecurityDescriptor,
+        :ConvertStringSecurityDescriptorToSecurityDescriptorA, [:string, :dword, :ptr, :ptr], :bool
     end
   end
 end
