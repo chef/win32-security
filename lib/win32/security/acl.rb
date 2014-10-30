@@ -2,6 +2,7 @@ require_relative 'windows/constants'
 require_relative 'windows/structs'
 require_relative 'windows/functions'
 require_relative 'sid'
+require_relative 'ace'
 
 # The Win32 module serves as a namespace only.
 module Win32
@@ -164,18 +165,16 @@ module Win32
         index
       end
 
-      # Finds and returns a pointer to an ACE in the ACL at the given
-      # +index+. If no index is provided, then a pointer to the first
-      # free byte of the ACL is returned.
-      #--
-      # I will probably have this return an ACE object.
+      # Finds and returns an ACE object for the ACL at the given
+      # +index+. If no index is provided, then it returns an ACE object
+      # that corresponds to the first free byte of the ACL.
       #
       def find_ace(index = nil)
         pptr = FFI::MemoryPointer.new(:pointer)
 
         if index.nil?
           unless FindFirstFreeAce(@acl, pptr)
-            raise SystemCallError.new("DeleteAce", FFI.errno)
+            raise SystemCallError.new("FindFirstFreeAce", FFI.errno)
           end
         else
           unless GetAce(@acl, index, pptr)
@@ -183,7 +182,12 @@ module Win32
           end
         end
 
-        pptr.read_pointer
+        # There's no way to know what type of ACE it is at this point as far
+        # as I know, so we use a generic struct and use the AceType to figure
+        # it out later.
+        ace = ACCESS_GENERIC_ACE.new(pptr.read_pointer)
+
+        ACE.new(ace[:Mask], ace[:Header][:AceType], ace[:Header][:AceFlags])
       end
 
       # Sets the revision information level, where the +revision_level+
@@ -216,7 +220,6 @@ end
 if $0 == __FILE__
   include Win32
   acl = Security::ACL.new
-  p acl.ace_count
   acl.add_access_denied_ace(
     'postgres',
     Security::ACL::GENERIC_EXECUTE
@@ -225,9 +228,8 @@ if $0 == __FILE__
     'postgres',
     Security::ACL::GENERIC_READ | Security::ACL::GENERIC_WRITE
   )
-  p acl.ace_count
-  p acl.find_ace
-  p acl.byte_info
-  #acl.delete_ace
+
   #p acl.ace_count
+  p acl.find_ace(0)
+  p acl.find_ace(1)
 end
