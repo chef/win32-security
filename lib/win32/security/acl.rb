@@ -58,6 +58,14 @@ module Win32
       #
       # The +mask+ is a bitwise OR'd value of access rights.
       #
+      # The +flags+ argument can be anyone of the following constants.
+      #
+      # * OBJECT_INHERIT_ACE
+      # * CONTAINER_INHERIT_ACE
+      # * NO_PROPAGATE_INHERIT_ACE
+      # * INHERIT_ONLY_ACE
+      # * INHERITED_ACE
+      #
       # Example:
       #
       #   acl = Win32::Security::ACL.new
@@ -88,6 +96,14 @@ module Win32
       # no sid is provided then the owner of the current process is used.
       #
       # The +mask+ is the bitwise OR'd value of access rights.
+      #
+      # The +flags+ argument can be any one of the following constants:
+      #
+      # * OBJECT_INHERIT_ACE
+      # * CONTAINER_INHERIT_ACE
+      # * NO_PROPAGATE_INHERIT_ACE
+      # * INHERIT_ONLY_ACE
+      # * INHERITED_ACE
       #
       def add_access_denied_ace(sid=nil, mask=0, flags=nil)
         if sid.is_a?(Win32::Security::SID)
