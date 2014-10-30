@@ -132,6 +132,34 @@ module Windows
       INHERIT_ONLY_ACE                        = 0x8
       INHERITED_ACE                           = 0x10
 
+      # ACE Types
+
+      ACCESS_MIN_MS_ACE_TYPE                  = 0x0
+      ACCESS_ALLOWED_ACE_TYPE                 = 0x0
+      ACCESS_DENIED_ACE_TYPE                  = 0x1
+      SYSTEM_AUDIT_ACE_TYPE                   = 0x2
+      SYSTEM_ALARM_ACE_TYPE                   = 0x3
+      ACCESS_MAX_MS_V2_ACE_TYPE               = 0x3
+      ACCESS_ALLOWED_COMPOUND_ACE_TYPE        = 0x4
+      ACCESS_MAX_MS_V3_ACE_TYPE               = 0x4
+      ACCESS_MIN_MS_OBJECT_ACE_TYPE           = 0x5
+      ACCESS_ALLOWED_OBJECT_ACE_TYPE          = 0x5
+      ACCESS_DENIED_OBJECT_ACE_TYPE           = 0x6
+      SYSTEM_AUDIT_OBJECT_ACE_TYPE            = 0x7
+      SYSTEM_ALARM_OBJECT_ACE_TYPE            = 0x8
+      ACCESS_MAX_MS_OBJECT_ACE_TYPE           = 0x8
+      ACCESS_MAX_MS_V4_ACE_TYPE               = 0x8
+      ACCESS_MAX_MS_ACE_TYPE                  = 0x8
+      ACCESS_ALLOWED_CALLBACK_ACE_TYPE        = 0x9
+      ACCESS_DENIED_CALLBACK_ACE_TYPE         = 0xA
+      ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE = 0xB
+      ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE  = 0xC
+      SYSTEM_AUDIT_CALLBACK_ACE_TYPE          = 0xD
+      SYSTEM_ALARM_CALLBACK_ACE_TYPE          = 0xE
+      SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE   = 0xF
+      SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE   = 0x10
+      ACCESS_MAX_MS_V5_ACE_TYPE               = 0x10
+
       # Standard Access Rights
 
       DELETE                       = 0x00010000
