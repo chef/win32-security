@@ -52,6 +52,19 @@ module Win32
         info[:AceCount]
       end
 
+      # Returns a two element array that consists of the bytes in use and
+      # bytes free for the ACL.
+      #
+      def byte_info
+        info = ACL_SIZE_INFORMATION.new
+
+        unless GetAclInformation(@acl, info, info.size, AclSizeInformation)
+          raise SystemCallError.new("GetAclInformation", FFI.errno)
+        end
+
+        [info[:AclBytesInUse], info[:AclBytesFree]]
+      end
+
       # Adds an access allowed ACE to the given +sid+, which can be a
       # Win32::Security::SID object or a plain user or group name. If no
       # sid is provided then the owner of the current process is used.
@@ -214,6 +227,7 @@ if $0 == __FILE__
   )
   p acl.ace_count
   p acl.find_ace
-  acl.delete_ace
-  p acl.ace_count
+  p acl.byte_info
+  #acl.delete_ace
+  #p acl.ace_count
 end
