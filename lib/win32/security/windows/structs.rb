@@ -30,7 +30,24 @@ module Windows
         )
       end
 
+      # Generic struct we made up and inspect later to determine type.
+      class ACCESS_GENERIC_ACE < FFI::Struct
+        layout(
+          :Header, ACE_HEADER,
+          :Mask, :ulong,
+          :SidStart, :ulong
+        )
+      end
+
       class ACCESS_ALLOWED_ACE < FFI::Struct
+        layout(
+          :Header, ACE_HEADER,
+          :Mask, :ulong,
+          :SidStart, :ulong
+        )
+      end
+
+      class ACCESS_DENIED_ACE < FFI::Struct
         layout(
           :Header, ACE_HEADER,
           :Mask, :ulong,
