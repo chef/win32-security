@@ -61,7 +61,7 @@ module Windows
         layout(
           :AceCount, :ulong,
           :AclBytesInUse, :ulong,
-          :AceBytesFree, :ulong
+          :AclBytesFree, :ulong
         )
       end
 
