@@ -33,35 +33,9 @@ module Win32
     # group.
     #
     def self.elevated_security?
-      if windows_version < 6
-        sid_ptr     = FFI::MemoryPointer.new(:pointer)
-        nt_auth_ptr = FFI::MemoryPointer.new(SID_IDENTIFIER_AUTHORITY,1)
+      result = false
 
-        nt_auth = SID_IDENTIFIER_AUTHORITY.new(nt_auth_ptr)
-        nt_auth[:Value].to_ptr.put_bytes(0, 0.chr*5 + 5.chr)
-
-        bool = AllocateAndInitializeSid(
-          nt_auth_ptr,
-          2,
-          SECURITY_BUILTIN_DOMAIN_RID,
-          DOMAIN_ALIAS_RID_ADMINS,
-          0, 0, 0, 0, 0, 0,
-          sid_ptr
-        )
-        unless bool
-          raise SystemCallError.new("AllocateAndInitializeSid", FFI.errno)
-        end
-
-        pbool = FFI::MemoryPointer.new(:long)
-
-        unless CheckTokenMembership(0, sid_ptr.read_pointer, pbool)
-          raise SystemCallError.new("CheckTokenMembership", FFI.errno)
-        end
-
-        pbool.read_long != 0
-      else
-        token = FFI::MemoryPointer.new(:uintptr_t)
-
+      FFI::MemoryPointer.new(:uintptr_t) do |token|
         unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
           raise SystemCallError.new("OpenProcessToken", FFI.errno)
         end
@@ -82,12 +56,16 @@ module Win32
           )
 
           raise SystemCallError.new("GetTokenInformation", FFI.errno) unless bool
+
+          result = te.read_ulong != 0
         ensure
           CloseHandle(token)
+          te.free
+          rl.free
         end
-
-        te.read_ulong != 0
       end
+
+      result
     end
 
     private
