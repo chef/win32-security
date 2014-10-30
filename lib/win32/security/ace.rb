@@ -31,8 +31,7 @@ module Win32
 
       attr_accessor :inherited_object_type
 
-      def initialize(sid, access_mask, ace_type, flags)
-        @sid = sid
+      def initialize(access_mask, ace_type, flags)
         @access_mask = access_mask
         @ace_type = ace_type
         @flags = flags
