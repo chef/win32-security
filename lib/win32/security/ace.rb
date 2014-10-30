@@ -10,27 +10,22 @@ module Win32
       # The version of the Win32::Security::ACE class.
       VERSION = '0.1.0'
 
-      # The ACE type, e.g. ACCESS_ALLOWED, ACCESS_DENIED, etc.
+      # The ACE type, e.g. ACCESS_ALLOWED, ACCESS_DENIED, etc. This is an integer.
       attr_accessor :ace_type
 
-      # The ACE mask, e.g. INHERITED_ACE
+      # The ACE mask, e.g. INHERITED_ACE. This is an integer.
       attr_accessor :ace_mask
 
-      # Standard access rights, e.g. GENERIC_READ, GENERIC_WRITE, etc
+      # Standard access rights, e.g. GENERIC_READ, GENERIC_WRITE, etc.
+      # This is an integer.
       attr_accessor :access_mask
 
-      # Bit flags that indicate whether the ObjectType and
-      # InheritedObjectType members are present. This value is set
-      # internally based on the values passed to the ACE#object_type or
-      # ACE#inherited_object_type methods, if any.
+      # Bit flags associated with the ACE, e.g. OBJECT_INHERIT_ACE, etc.
+      # This is an integer.
       attr_reader :flags
 
-      # A Win32::Security::GUID object that identifies the type of child
-      # object that can inherit the ACE.
-      attr_accessor :object_type
-
-      attr_accessor :inherited_object_type
-
+      # Creates and returns an ACE object.
+      #
       def initialize(access_mask, ace_type, flags)
         @access_mask = access_mask
         @ace_type = ace_type
@@ -38,6 +33,8 @@ module Win32
         yield self if block_given?
       end
 
+      # Returns the type of ace as a string, e.g. "ACCESS_ALLOWED_TYPE_ACE".
+      #
       def ace_type_string
         case @ace_type
           when 0x0
