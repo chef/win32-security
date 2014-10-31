@@ -219,7 +219,6 @@ module Win32
             token_info = pinfo.read_pointer
           ensure
             CloseHandle(token) if token
-            ptoken.free
           end
         end
 
@@ -303,12 +302,6 @@ module Win32
         @domain = domain.read_string
 
         @account_type = get_account_type(use_ptr.read_ulong)
-
-        use_ptr.free
-        sid.free
-        sid_size.free
-        domain.free
-        domain_size.free
       end
 
       # Synonym for SID.new.
