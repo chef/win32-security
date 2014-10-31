@@ -194,13 +194,14 @@ module Win32
             if !bool && FFI.errno != ERROR_NO_TOKEN
               raise SystemCallError.new("OpenThreadToken", FFI.errno)
             else
-              ptoken = FFI::MemoryPointer.new(:uintptr_t)
+              ptoken.clear
               unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptoken)
                 raise SystemCallError.new("OpenProcessToken", FFI.errno)
               end
             end
 
             token = ptoken.read_pointer.to_i
+
             pinfo = FFI::MemoryPointer.new(:pointer)
             plength = FFI::MemoryPointer.new(:ulong)
 
@@ -208,7 +209,7 @@ module Win32
             GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
 
             pinfo = FFI::MemoryPointer.new(plength.read_ulong)
-            plength = FFI::MemoryPointer.new(:ulong)
+            plength.clear
 
             # Second pass, actual call (1 is TokenOwner)
             unless GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
@@ -218,6 +219,7 @@ module Win32
             token_info = pinfo.read_pointer
           ensure
             CloseHandle(token) if token
+            ptoken.free
           end
         end
 
@@ -253,6 +255,7 @@ module Win32
           end
         elsif ordinal_val < 10 # Assume it's a binary SID.
           account_ptr = FFI::MemoryPointer.from_string(account)
+
           bool = LookupAccountSid(
             host,
             account_ptr,
@@ -262,9 +265,12 @@ module Win32
             domain_size,
             use_ptr
           )
+
           unless bool
             raise SystemCallError.new("LookupAccountSid", FFI.errno)
           end
+
+          account_ptr.free
         else
           bool = LookupAccountName(
             host,
@@ -297,6 +303,12 @@ module Win32
         @domain = domain.read_string
 
         @account_type = get_account_type(use_ptr.read_ulong)
+
+        use_ptr.free
+        sid.free
+        sid_size.free
+        domain.free
+        domain_size.free
       end
 
       # Synonym for SID.new.
