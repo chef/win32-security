@@ -170,24 +170,27 @@ module Win32
       # that corresponds to the first free byte of the ACL.
       #
       def find_ace(index = nil)
-        pptr = FFI::MemoryPointer.new(:pointer)
+        result = nil
 
-        if index.nil?
-          unless FindFirstFreeAce(@acl, pptr)
-            raise SystemCallError.new("FindFirstFreeAce", FFI.errno)
+        FFI::MemoryPointer.new(:pointer) do |pptr|
+          if index.nil?
+            unless FindFirstFreeAce(@acl, pptr)
+              raise SystemCallError.new("FindFirstFreeAce", FFI.errno)
+            end
+          else
+            unless GetAce(@acl, index, pptr)
+              raise SystemCallError.new("GetAce", FFI.errno)
+            end
           end
-        else
-          unless GetAce(@acl, index, pptr)
-            raise SystemCallError.new("GetAce", FFI.errno)
-          end
+
+          # There's no way to know what type of ACE it is at this point as far
+          # as I know, so we use a generic struct and use the AceType to figure
+          # it out later.
+          ace = ACCESS_GENERIC_ACE.new(pptr.read_pointer)
+          result = ACE.new(ace[:Mask], ace[:Header][:AceType], ace[:Header][:AceFlags])
         end
 
-        # There's no way to know what type of ACE it is at this point as far
-        # as I know, so we use a generic struct and use the AceType to figure
-        # it out later.
-        ace = ACCESS_GENERIC_ACE.new(pptr.read_pointer)
-
-        ACE.new(ace[:Mask], ace[:Header][:AceType], ace[:Header][:AceFlags])
+        result
       end
 
       # Sets the revision information level, where the +revision_level+
@@ -196,11 +199,12 @@ module Win32
       # Returns the revision level if successful.
       #
       def revision=(revision_level)
-        buf = FFI::MemoryPointer.new(:ulong)
-        buf.write_ulong(revision_level)
+        FFI::MemoryPointer.new(:ulong) do |buf|
+          buf.write_ulong(revision_level)
 
-        unless SetAclInformation(@acl, buf, buf.size, AclRevisionInformation)
-          raise SystemCallError.new("SetAclInformation", FFI.errno)
+          unless SetAclInformation(@acl, buf, buf.size, AclRevisionInformation)
+            raise SystemCallError.new("SetAclInformation", FFI.errno)
+          end
         end
 
         @revision = revision_level
@@ -220,6 +224,7 @@ end
 if $0 == __FILE__
   include Win32
   acl = Security::ACL.new
+=begin
   acl.add_access_denied_ace(
     'postgres',
     Security::ACL::GENERIC_EXECUTE
@@ -230,6 +235,8 @@ if $0 == __FILE__
   )
 
   #p acl.ace_count
-  p acl.find_ace(0)
-  p acl.find_ace(1)
+  p acl.find_ace(0).ace_type_string
+  p acl.find_ace(1).ace_type_string
+=end
+  p acl.find_ace
 end
