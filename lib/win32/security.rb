@@ -85,4 +85,4 @@ end
 
 require 'win32/security/sid'
 require 'win32/security/acl'
-#require 'win32/security/ace'
+require 'win32/security/ace'
