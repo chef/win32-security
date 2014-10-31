@@ -54,11 +54,16 @@ class TC_Win32_Security_Acl < Test::Unit::TestCase
 
   test "find_ace basic functionality" do
     assert_respond_to(@acl, :find_ace)
-    assert_kind_of(Fixnum, @acl.find_ace)
   end
 
-  test "find_ace returns a sane value" do
-    assert_true(@acl.find_ace > 1000)
+  test "find_ace returns an ACE object if there is one to find" do
+    @acl.add_access_allowed_ace('Guest', Win32::Security::ACL::GENERIC_READ)
+    assert_kind_of(Win32::Security::ACE, @acl.find_ace)
+  end
+
+  test "find_ace accepts an integer argument" do
+    @acl.add_access_allowed_ace('Guest', Win32::Security::ACL::GENERIC_READ)
+    assert_kind_of(Win32::Security::ACE, @acl.find_ace(0))
   end
 
   test "revision getter basic functionality" do
