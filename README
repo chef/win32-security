@@ -30,7 +30,11 @@
   interested in taking a look.
    
 == Known Issues
-  None that I'm aware of. Please file any bug reports on the project page at:
+  There appears to be an issue with 64-bit versions of JRuby. I believe this
+  is related to this issue: https://github.com/jruby/jruby/issues/1315. There
+  is nothing I can do about it here.
+
+  Please file any other bug reports on the project page at:
 
   https://github.com/djberg96/win32-security
 
