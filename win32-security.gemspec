@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
    
   spec.description = <<-EOF
     The win32-security library provides an interface for dealing with
-    security related aspects of MS Windows. At the moment it provides an
-    interface for inspecting or creating SID's.
+    security related aspects of MS Windows, such as SID's, ACL's and
+    ACE's.
   EOF
 end
