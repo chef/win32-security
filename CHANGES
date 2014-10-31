@@ -1,4 +1,4 @@
-== 0.3.0 - ???
+== 0.3.0 - 31-Oct-2014
 * Implemented an ACL class that lets you create and inspect acccess
   control lists.
 * Implemented a basic ACE class that encapsulates an ACE object.
