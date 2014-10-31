@@ -169,7 +169,10 @@ module Win32
       # +index+. If no index is provided, then it returns an ACE object
       # that corresponds to the first free byte of the ACL.
       #
-      def find_ace(index = nil)
+      # If +raw+ is true, it will return an ACCESS_GENERIC_ACE struct,
+      # an FFI object that you can then access directly.
+      #
+      def find_ace(index = nil, raw = false)
         result = nil
 
         FFI::MemoryPointer.new(:pointer) do |pptr|
@@ -185,9 +188,14 @@ module Win32
 
           # There's no way to know what type of ACE it is at this point as far
           # as I know, so we use a generic struct and use the AceType to figure
-          # it out later.
+          # it out later, or the users can.
           ace = ACCESS_GENERIC_ACE.new(pptr.read_pointer)
-          result = ACE.new(ace[:Mask], ace[:Header][:AceType], ace[:Header][:AceFlags])
+
+          if raw
+            result = ace
+          else
+            result = ACE.new(ace[:Mask], ace[:Header][:AceType], ace[:Header][:AceFlags])
+          end
         end
 
         result
@@ -219,24 +227,4 @@ module Win32
       end
     end
   end
-end
-
-if $0 == __FILE__
-  include Win32
-  acl = Security::ACL.new
-=begin
-  acl.add_access_denied_ace(
-    'postgres',
-    Security::ACL::GENERIC_EXECUTE
-  )
-  acl.add_access_allowed_ace(
-    'postgres',
-    Security::ACL::GENERIC_READ | Security::ACL::GENERIC_WRITE
-  )
-
-  #p acl.ace_count
-  p acl.find_ace(0).ace_type_string
-  p acl.find_ace(1).ace_type_string
-=end
-  p acl.find_ace
 end
