@@ -1,7 +1,9 @@
 == 0.3.0 - ???
-* Removed Windows XP support.
 * Implemented an ACL class that lets you create and inspect acccess
   control lists.
+* Implemented a basic ACE class that encapsulates an ACE object.
+* Removed Windows XP support.
+* Some minor updates to the Rakefile and gemspec.
 
 == 0.2.5 - 24-Feb-2014
 * Fixed a bug in the SID#string_to_sid method. Thanks go to Rob Reynolds
