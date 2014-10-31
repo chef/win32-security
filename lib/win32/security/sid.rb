@@ -1,6 +1,3 @@
-require_relative 'windows/constants'
-require_relative 'windows/functions'
-require_relative 'windows/structs'
 require 'socket'
 
 # The Win32 module serves as a namespace only.

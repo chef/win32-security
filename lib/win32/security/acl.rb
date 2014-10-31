@@ -1,9 +1,3 @@
-require_relative 'windows/constants'
-require_relative 'windows/structs'
-require_relative 'windows/functions'
-require_relative 'sid'
-require_relative 'ace'
-
 # The Win32 module serves as a namespace only.
 module Win32
 
