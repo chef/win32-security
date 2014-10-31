@@ -13,9 +13,6 @@ module Win32
       # The ACE type, e.g. ACCESS_ALLOWED, ACCESS_DENIED, etc. This is an integer.
       attr_accessor :ace_type
 
-      # The ACE mask, e.g. INHERITED_ACE. This is an integer.
-      attr_accessor :ace_mask
-
       # Standard access rights, e.g. GENERIC_READ, GENERIC_WRITE, etc.
       # This is an integer.
       attr_accessor :access_mask
