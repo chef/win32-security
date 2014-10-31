@@ -78,27 +78,35 @@ module Win32
       # Converts a binary SID to a string in S-R-I-S-S... format.
       #
       def self.sid_to_string(sid)
-        string_sid = FFI::MemoryPointer.new(:pointer)
+        result = nil
 
-        unless ConvertSidToStringSid(sid, string_sid)
-          raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
+        FFI::MemoryPointer.new(:pointer) do |string_sid|
+          unless ConvertSidToStringSid(sid, string_sid)
+            raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
+          end
+
+          result = string_sid.read_pointer.read_string
         end
 
-        string_sid.read_pointer.read_string
+        result
       end
 
       # Converts a string in S-R-I-S-S... format back to a binary SID.
       #
       def self.string_to_sid(string)
-        sid = FFI::MemoryPointer.new(:pointer)
+        result = nil
 
-        unless ConvertStringSidToSid(string, sid)
-          raise SystemCallError.new("ConvertStringSidToSid", FFI.errno)
+        FFI::MemoryPointer.new(:pointer) do |sid|
+          unless ConvertStringSidToSid(string, sid)
+            raise SystemCallError.new("ConvertStringSidToSid", FFI.errno)
+          end
+
+          ptr = sid.read_pointer
+
+          result = ptr.read_bytes(GetLengthSid(ptr))
         end
 
-        ptr = sid.read_pointer
-
-        ptr.read_bytes(GetLengthSid(ptr))
+        result
       end
 
       # Creates a new SID with +authority+ and up to 8 +subauthorities+,
@@ -127,21 +135,25 @@ module Win32
         end
 
         size = GetSidLengthRequired(sub_authorities.length)
-        sid  = FFI::MemoryPointer.new(:uchar, size)
+        new_obj = nil
 
-        auth = SID_IDENTIFIER_AUTHORITY.new
-        auth[:Value][5] = authority
+        FFI::MemoryPointer.new(:uchar, size) do |sid|
+          auth = SID_IDENTIFIER_AUTHORITY.new
+          auth[:Value][5] = authority
 
-        unless InitializeSid(sid, auth, sub_authorities.length)
-          raise SystemCallError.new("InitializeSid", FFI.errno)
+          unless InitializeSid(sid, auth, sub_authorities.length)
+            raise SystemCallError.new("InitializeSid", FFI.errno)
+          end
+
+          sub_authorities.each_index do |i|
+            ptr = GetSidSubAuthority(sid, i)
+            ptr.write_ulong(sub_authorities[i])
+          end
+
+          new_obj = new(sid.read_string(size)) # Pass a binary string
         end
 
-        sub_authorities.each_index do |i|
-          ptr = GetSidSubAuthority(sid, i)
-          ptr.write_ulong(sub_authorities[i])
-        end
-
-        new(sid.read_string(size)) # Pass a binary string
+        new_obj
       end
 
       # Creates and returns a new Win32::Security::SID object, based on
@@ -297,13 +309,17 @@ module Win32
       # storage or transmission.
       #
       def to_s
-        ptr = FFI::MemoryPointer.new(:pointer)
+        string = nil
 
-        unless ConvertSidToStringSid(@sid, ptr)
-          raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
+        FFI::MemoryPointer.new(:pointer) do |ptr|
+          unless ConvertSidToStringSid(@sid, ptr)
+            raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
+          end
+
+          string = ptr.read_pointer.read_string
         end
 
-        ptr.read_pointer.read_string
+        string
       end
 
       alias to_str to_s
