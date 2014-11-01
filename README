@@ -1,7 +1,7 @@
 = Description
   A security library for MS Windows that allows you to open existing or
   create new security identifiers (SID's), as well as create access
-  control lists (ACL's).
+  control lists (ACL's) and access control entries (ACE's).
 
 = Synopsis
   require 'win32/security'
@@ -24,10 +24,7 @@
   acl.valid?    # => true
    
 == Future Plans
-  Create classes that encapsulate ACE's and Tokens.
-   
-  There is an unfinished versions of the ACE class in the repo if you're
-  interested in taking a look.
+  None at the moment. Suggestions welcome.
    
 == Known Issues
   There appears to be an issue with 64-bit versions of JRuby. I believe this
