@@ -20,7 +20,7 @@ module Win32
     extend Windows::Security::Functions
 
     # The version of the win32-security library
-    VERSION = '0.3.0'
+    VERSION = '0.3.1'
 
     # Used by OpenProcessToken
     TOKEN_QUERY = 8
@@ -28,14 +28,17 @@ module Win32
     # Returns whether or not the owner of the current process is running
     # with elevated security privileges.
     #
-    # On Windows XP an earlier this method is actually just checking to
-    # see if the caller's process is a member of the local Administrator's
-    # group.
-    #
     def self.elevated_security?
       result = false
 
-      FFI::MemoryPointer.new(:uintptr_t) do |token|
+      # Work around a 64-bit JRuby bug
+      if RUBY_PLATFORM == 'java' && ENV_JAVA['sun.arch.data.model'] == '64'
+        ptr_type = :ulong_long
+      else
+        ptr_type = :uintptr_t
+      end
+
+      FFI::MemoryPointer.new(ptr_type) do |token|
         unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
           raise SystemCallError.new("OpenProcessToken", FFI.errno)
         end

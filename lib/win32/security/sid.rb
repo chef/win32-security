@@ -183,7 +183,13 @@ module Win32
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
           begin
-            ptoken = FFI::MemoryPointer.new(:uintptr_t)
+            if RUBY_PLATFORM == 'java' && ENV_JAVA['sun.arch.data.model'] == '64'
+              ptr_type = :ulong_long
+            else
+              ptr_type = :uintptr_t
+            end
+
+            ptoken = FFI::MemoryPointer.new(ptr_type)
 
             # Try the thread token first, default to the process token.
             bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, ptoken)

@@ -14,8 +14,14 @@ module Windows
       end
 
       typedef :ulong, :dword
-      typedef :uintptr_t, :handle
       typedef :pointer, :ptr
+
+      # Work around a bug in 64-bit JRuby
+      if RUBY_PLATFORM == 'java' && ENV_JAVA['sun.arch.data.model'] == '64'
+        typedef :ulong_long, :handle
+      else
+        typedef :uintptr_t, :handle
+      end
 
       ffi_lib :kernel32
       ffi_convention :stdcall
