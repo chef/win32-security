@@ -1,3 +1,6 @@
+== 0.3.1 - 8-Dec-2014
+* Work around a bug in 64-bit JRuby, which doesn't handle uintptr_t properly.
+
 == 0.3.0 - 31-Oct-2014
 * Implemented an ACL class that lets you create and inspect acccess
   control lists.
