@@ -89,6 +89,25 @@ module Windows
           :bInheritHandle, :bool
         )
       end
+
+      class TRUSTEE < FFI::Struct
+        layout(
+          :pMultipleTrustee, :pointer,
+          :MultipleTrusteeOperation, :int,
+          :TrusteeForm, :int,
+          :TrusteeType, :int,
+          :ptstrName, :pointer
+        )
+      end
+
+      class EXPLICIT_ACCESS < FFI::Struct
+        layout(
+          :grfAccessPermissions, :ulong,
+          :grfAccessMode, :int,
+          :grfInheritance, :ulong,
+          :Trustee, TRUSTEE
+        )
+      end
     end
   end
 end
