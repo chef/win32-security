@@ -56,6 +56,8 @@ module Win32
       BackupOperators             = 'S-1-5-32-551'
       Replicators                 = 'S-1-5-32-552'
 
+      AllAppPackages = 'S-1-15-2-1'
+
       # The binary SID object itself.
       attr_reader :sid
 
