@@ -14,7 +14,7 @@ module Win32
       extend Windows::Security::Functions
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.2.1'
+      VERSION = '0.2.2'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -192,7 +192,7 @@ module Win32
             ptoken = FFI::MemoryPointer.new(ptr_type)
 
             # Try the thread token first, default to the process token.
-            bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, ptoken)
+            bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, ptoken)
 
             if !bool && FFI.errno != ERROR_NO_TOKEN
               raise SystemCallError.new("OpenThreadToken", FFI.errno)
