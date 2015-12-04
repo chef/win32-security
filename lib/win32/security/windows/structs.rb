@@ -86,7 +86,7 @@ module Windows
         layout(
           :nLength, :ulong,
           :lpSecurityDescriptor, :ulong,
-          :bInheritHandle, :bool
+          :bInheritHandle, :int
         )
       end
     end
