@@ -1,3 +1,9 @@
+== 0.3.2 - 4-Dec-2015
+* This gem is now signed.
+* Added a win32-security.rb file for convenience.
+* The gem related tasks in the Rakefile now assume Rubygems 2.x.
+* Fixed a function and struct prototype.
+
 == 0.3.1 - 8-Dec-2014
 * Work around a bug in 64-bit JRuby, which doesn't handle uintptr_t properly.
 
