@@ -101,8 +101,8 @@ module Windows
       attach_pfunc :IsValidAcl, [:ptr], :bool
       attach_pfunc :IsValidSid, [:ptr], :bool
       attach_pfunc :IsWellKnownSid, [:ptr, :int], :bool
-      attach_pfunc :LookupAccountName, :LookupAccountNameA, [:string, :string, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
-      attach_pfunc :LookupAccountSid, :LookupAccountSidA, [:string, :ptr, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
+      attach_pfunc :LookupAccountName, :LookupAccountNameW, [:buffer_in, :buffer_in, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
+      attach_pfunc :LookupAccountSid, :LookupAccountSidW, [:buffer_in, :ptr, :ptr, :ptr, :ptr, :ptr, :ptr], :bool
       attach_pfunc :OpenProcessToken, [:handle, :dword, :ptr], :bool
       attach_pfunc :OpenThreadToken, [:handle, :dword, :int, :ptr], :bool
       attach_pfunc :SetAclInformation, [:ptr, :ptr, :dword, :int], :bool
