@@ -227,11 +227,11 @@ module Win32
 
         ordinal_val = account ? account[0].ord : nil
 
-        sid = FFI::MemoryPointer.new(:uchar, 260)
+        sid = FFI::MemoryPointer.new(:uchar, 1024)
         sid_size = FFI::MemoryPointer.new(:ulong)
         sid_size.write_ulong(sid.size)
 
-        domain = FFI::MemoryPointer.new(:uchar, 260)
+        domain = FFI::MemoryPointer.new(:uchar, 1024)
         domain_size = FFI::MemoryPointer.new(:ulong)
         domain_size.write_ulong(domain.size)
 
@@ -254,7 +254,7 @@ module Win32
           account_ptr = FFI::MemoryPointer.from_string(account)
 
           bool = LookupAccountSid(
-            host,
+            host.encode('UTF-16LE'),
             account_ptr,
             sid,
             sid_size,
@@ -270,8 +270,8 @@ module Win32
           account_ptr.free
         else
           bool = LookupAccountName(
-            host,
-            account,
+            host.encode('UTF-16LE'),
+            account.encode('UTF-16LE'),
             sid,
             sid_size,
             domain,
@@ -287,18 +287,19 @@ module Win32
         if ordinal_val.nil?
           length = GetLengthSid(token_info)
           @sid = token_info.read_string(length)
-          @account = sid.read_string(sid.size).strip
+          @account = sid.read_string(sid.size).wstrip
         elsif ordinal_val < 10
           @sid = account
-          @account = sid.read_string(sid.size).strip
+          @account = sid.read_string(sid.size).wstrip
         else
           length = GetLengthSid(sid)
           @sid = sid.read_string(length)
           @account = account
         end
 
+
         @host   = host
-        @domain = domain.read_string
+        @domain = domain.read_string(domain.size).wstrip
 
         @account_type = get_account_type(use_ptr.read_ulong)
       end
