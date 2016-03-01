@@ -20,7 +20,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "version is set to expected value" do
-    assert_equal('0.2.2', Security::SID::VERSION)
+    assert_equal('0.2.3', Security::SID::VERSION)
   end
 
   test "sid method basic functionality" do
@@ -106,7 +106,13 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "constructor accepts an account argument" do
-    assert_nothing_raised{ Security::SID.new(@@name) }
+    assert_nothing_raised{ @sid = Security::SID.new(@@name) }
+    assert_equal(Etc.getlogin, @sid.account)
+  end
+
+  test "constructor accepts a sid argument" do
+    assert_nothing_raised{ @sid = Security::SID.new(@sid.sid) }
+    assert_equal(Etc.getlogin, @sid.account)
   end
 
   test "constructor accepts a host argument" do
