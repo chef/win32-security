@@ -4,6 +4,7 @@
 require_relative 'security/windows/constants'
 require_relative 'security/windows/structs'
 require_relative 'security/windows/functions'
+require_relative 'security/windows/helper'
 
 # The Win32 module serves as a namespace only.
 module Win32
