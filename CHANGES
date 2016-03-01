@@ -1,3 +1,9 @@
+== 0.3.3 - 1-Mar-2016
+* Fixed a potential bug in the Win32::Security::SID constructor. Thanks go
+  to nmeilick for the spot and patch.
+* This gem now requires Ruby 1.9.3 or later.
+* Added some SID tests.
+
 == 0.3.2 - 4-Dec-2015
 * This gem is now signed.
 * Added a win32-security.rb file for convenience.
