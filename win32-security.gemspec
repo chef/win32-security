@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-security'
-  spec.version    = '0.3.2'
+  spec.version    = '0.3.3'
   spec.authors    = ['Daniel J. Berger', 'Park Heesob']
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
@@ -13,6 +13,8 @@ Gem::Specification.new do |spec|
   spec.cert_chain = Dir['certs/*']
 
   spec.extra_rdoc_files  = ['README', 'CHANGES', 'MANIFEST']
+
+  spec.required_ruby_version = '>= 1.9.3'
    
   spec.add_dependency('ffi')
 
