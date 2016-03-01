@@ -14,7 +14,7 @@ module Win32
       extend Windows::Security::Functions
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.2.2'
+      VERSION = '0.2.3'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -225,12 +225,7 @@ module Win32
           end
         end
 
-        if account
-          ordinal_val = account[0]
-          ordinal_val = ordinal_val.ord if RUBY_VERSION.to_f >= 1.9
-        else
-          ordinal_val = nil
-        end
+        ordinal_val = account ? account[0].ord : nil
 
         sid = FFI::MemoryPointer.new(:uchar, 260)
         sid_size = FFI::MemoryPointer.new(:ulong)
@@ -290,7 +285,8 @@ module Win32
 
         # The arguments are flipped depending on which path we took
         if ordinal_val.nil?
-          @sid = token_info.read_string
+          length = GetLengthSid(token_info)
+          @sid = token_info.read_string(length)
           @account = sid.read_string(sid.size).strip
         elsif ordinal_val < 10
           @sid = account
