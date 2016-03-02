@@ -106,11 +106,6 @@ module Windows
       attach_pfunc :OpenProcessToken, [:handle, :dword, :ptr], :bool
       attach_pfunc :OpenThreadToken, [:handle, :dword, :int, :ptr], :bool
       attach_pfunc :SetAclInformation, [:ptr, :ptr, :dword, :int], :bool
-
-      attach_pfunc :ConvertSecurityDescriptorToStringSecurityDescriptor,
-        :ConvertSecurityDescriptorToStringSecurityDescriptorA, [:ptr, :dword, :dword, :ptr, :ptr], :bool
-      attach_pfunc :ConvertStringSecurityDescriptorToSecurityDescriptor,
-        :ConvertStringSecurityDescriptorToSecurityDescriptorA, [:string, :dword, :ptr, :ptr], :bool
     end
   end
 end
