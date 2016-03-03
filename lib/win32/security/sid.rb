@@ -287,19 +287,19 @@ module Win32
         if ordinal_val.nil?
           length = GetLengthSid(token_info)
           @sid = token_info.read_string(length)
-          @account = sid.read_string(sid.size).wstrip
+          @account = sid.read_bytes(sid.size).wstrip
         elsif ordinal_val < 10
           @sid = account
-          @account = sid.read_string(sid.size).wstrip
+          @account = sid.read_bytes(sid.size).wstrip
         else
           length = GetLengthSid(sid)
-          @sid = sid.read_string(length)
+          @sid = sid.read_bytes(length)
           @account = account
         end
 
 
         @host   = host
-        @domain = domain.read_string(domain.size).wstrip
+        @domain = domain.read_bytes(domain.size).wstrip
 
         @account_type = get_account_type(use_ptr.read_ulong)
       end
