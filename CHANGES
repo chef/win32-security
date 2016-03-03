@@ -1,3 +1,6 @@
+== 0.4.0 - ???
+* Added wide character support.
+
 == 0.3.3 - 1-Mar-2016
 * Fixed a potential bug in the Win32::Security::SID constructor. Thanks go
   to nmeilick for the spot and patch.
