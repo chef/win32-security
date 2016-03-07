@@ -1,5 +1,8 @@
-== 0.4.0 - ???
-* Added wide character support.
+== 0.4.0 - 7-Mar-2016
+* Added wide character support. Thanks go to Ethan J. Brown for finally forcing
+  me to get around to this.
+* Removed some unused FFI functions.
+* Added the String#wstrip helper method if not already defined.
 
 == 0.3.3 - 1-Mar-2016
 * Fixed a potential bug in the Win32::Security::SID constructor. Thanks go
