@@ -21,7 +21,7 @@ module Win32
     extend Windows::Security::Functions
 
     # The version of the win32-security library
-    VERSION = '0.3.3'
+    VERSION = '0.4.0'
 
     # Used by OpenProcessToken
     TOKEN_QUERY = 8
