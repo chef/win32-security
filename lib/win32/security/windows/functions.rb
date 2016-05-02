@@ -23,7 +23,7 @@ module Windows
         typedef :uintptr_t, :handle
       end
 
-      ffi_lib :kernel32
+      ffi_lib 'kernel32'
       ffi_convention :stdcall
 
       enum :token_info_class, [
@@ -76,7 +76,7 @@ module Windows
       attach_pfunc :GetLastError, [], :dword
       attach_pfunc :CloseHandle, [:dword], :bool
 
-      ffi_lib :advapi32
+      ffi_lib 'advapi32'
 
       attach_pfunc :AddAce, [:ptr, :dword, :dword, :ptr, :dword], :bool
       attach_pfunc :AddAccessAllowedAce, [:ptr, :dword, :dword, :ptr], :bool
