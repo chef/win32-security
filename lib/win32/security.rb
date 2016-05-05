@@ -48,9 +48,18 @@ module Win32
           token = token.read_pointer.to_i
 
           # Since the TokenElevation struct only has 1 member, we use a pointer.
-          te = FFI::MemoryPointer.new(:ulong)
+          te = FFI::MemoryPointer.new(:pointer)
           rl = FFI::MemoryPointer.new(:ulong)
 
+          bool = GetTokenInformation(
+            token,
+            :TokenElevation,
+            te,
+            te.size,
+            rl
+          )
+          te = FFI::MemoryPointer.new(rl.read_ulong)
+          rl.clear
           bool = GetTokenInformation(
             token,
             :TokenElevation,
@@ -61,7 +70,8 @@ module Win32
 
           raise SystemCallError.new("GetTokenInformation", FFI.errno) unless bool
 
-          result = te.read_ulong != 0
+          token_info = rl.read_ulong == 4 ? te.read_uint : te.read_ulong
+          result = token_info != 0
         ensure
           CloseHandle(token)
           te.free
