@@ -216,7 +216,7 @@ module Win32
 
             # Second pass, actual call (1 is TokenOwner)
             unless GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
-              raise SystemCallError.new("GetTokenInformation", FFI.errno)
+              FFI.raise_windows_error('GetTokenInformation')
             end
 
             token_info = pinfo.read_pointer

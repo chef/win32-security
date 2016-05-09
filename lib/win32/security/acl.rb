@@ -12,7 +12,7 @@ module Win32
       extend Windows::Security::Functions
 
       # The version of the Win32::Security::ACL class.
-      VERSION = '0.2.0'
+      VERSION = '0.2.1'
 
       # The underlying ACL structure.
       attr_reader :acl
@@ -28,7 +28,7 @@ module Win32
         acl = ACL_STRUCT.new
 
         unless InitializeAcl(acl, size, revision)
-          raise SystemCallError.new("InitializeAcl", FFI.errno)
+          FFI.raise_windows_error('InitializeAcl')
         end
 
         @acl = acl
@@ -41,7 +41,7 @@ module Win32
         info = ACL_SIZE_INFORMATION.new
 
         unless GetAclInformation(@acl, info, info.size, AclSizeInformation)
-          raise SystemCallError.new("GetAclInformation", FFI.errno)
+          FFI.raise_windows_error('GetAclInformation')
         end
 
         info[:AceCount]
@@ -54,7 +54,7 @@ module Win32
         info = ACL_SIZE_INFORMATION.new
 
         unless GetAclInformation(@acl, info, info.size, AclSizeInformation)
-          raise SystemCallError.new("GetAclInformation", FFI.errno)
+          FFI.raise_windows_error('GetAclInformation')
         end
 
         [info[:AclBytesInUse], info[:AclBytesFree]]
@@ -88,11 +88,11 @@ module Win32
 
         if flags
           unless AddAccessAllowedAceEx(@acl, @revision, flags, mask, sid)
-            raise SystemCallError.new("AddAccessAllowedAceEx", FFI.errno)
+            FFI.raise_windows_error('AddAccessAllowedAceEx')
           end
         else
           unless AddAccessAllowedAce(@acl, @revision, mask, sid)
-            raise SystemCallError.new("AddAccessAllowedAce", FFI.errno)
+            FFI.raise_windows_error('AddAccessAllowedAce')
           end
         end
 
@@ -122,11 +122,11 @@ module Win32
 
         if flags
           unless AddAccessDeniedAceEx(@acl, @revision, flags, mask, sid)
-            raise SystemCallError.new("AddAccessDeniedAceEx", FFI.errno)
+            FFI.raise_windows_error('AddAccessDeniedAceEx')
           end
         else
           unless AddAccessDeniedAce(@acl, @revision, mask, sid)
-            raise SystemCallError.new("AddAccessDeniedAce", FFI.errno)
+            FFI.raise_windows_error('AddAccessDeniedAce')
           end
         end
       end
@@ -140,7 +140,7 @@ module Win32
       #
       def add_ace(ace, index=MAXDWORD)
         unless AddAce(@acl, @revision, index, ace, ace.length)
-          raise SystemCallError.new("AddAce", FFI.errno)
+          FFI.raise_windows_error('AddAce')
         end
 
         index
@@ -153,7 +153,7 @@ module Win32
       #
       def delete_ace(index=MAXDWORD)
         unless DeleteAce(@acl, index)
-          raise SystemCallError.new("DeleteAce", FFI.errno)
+          FFI.raise_windows_error('DeleteAce')
         end
 
         index
@@ -172,11 +172,11 @@ module Win32
         FFI::MemoryPointer.new(:pointer) do |pptr|
           if index.nil?
             unless FindFirstFreeAce(@acl, pptr)
-              raise SystemCallError.new("FindFirstFreeAce", FFI.errno)
+              FFI.raise_windows_error('FindFirstFreeAce')
             end
           else
             unless GetAce(@acl, index, pptr)
-              raise SystemCallError.new("GetAce", FFI.errno)
+              FFI.raise_windows_error('GetAce')
             end
           end
 
@@ -205,7 +205,7 @@ module Win32
           buf.write_ulong(revision_level)
 
           unless SetAclInformation(@acl, buf, buf.size, AclRevisionInformation)
-            raise SystemCallError.new("SetAclInformation", FFI.errno)
+            FFI.raise_windows_error('SetAclInformation')
           end
         end
 
