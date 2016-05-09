@@ -1,10 +1,10 @@
 # This file allows users to require all security related classes from
 # a single file, instead of having to require individual files.
 
+require 'ffi/win32/extensions'
 require_relative 'security/windows/constants'
 require_relative 'security/windows/structs'
 require_relative 'security/windows/functions'
-require_relative 'security/windows/helper'
 
 # The Win32 module serves as a namespace only.
 module Win32
@@ -21,7 +21,7 @@ module Win32
     extend Windows::Security::Functions
 
     # The version of the win32-security library
-    VERSION = '0.4.0'
+    VERSION = '0.4.1'
 
     # Used by OpenProcessToken
     TOKEN_QUERY = 8
@@ -41,7 +41,7 @@ module Win32
 
       FFI::MemoryPointer.new(ptr_type) do |token|
         unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
-          raise SystemCallError.new("OpenProcessToken", FFI.errno)
+          FFI.raise_windows_error('OpenProcessToken')
         end
 
         begin
@@ -59,7 +59,7 @@ module Win32
             rl
           )
 
-          raise SystemCallError.new("GetTokenInformation", FFI.errno) unless bool
+          FFI.raise_windows_error('GetTokenInformation') unless bool
 
           result = te.read_ulong != 0
         ensure
@@ -79,7 +79,7 @@ module Win32
       ver[:dwOSVersionInfoSize] = ver.size
 
       unless GetVersionExA(ver)
-        raise SystemCallError.new("GetVersionEx", FFI.errno)
+        FFI.raise_windows_error('GetVersionEx')
       end
 
       ver[:dwMajorVersion]

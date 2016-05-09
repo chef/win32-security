@@ -14,7 +14,7 @@ module Win32
       extend Windows::Security::Functions
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.2.3'
+      VERSION = '0.2.4'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -79,7 +79,7 @@ module Win32
 
         FFI::MemoryPointer.new(:pointer) do |string_sid|
           unless ConvertSidToStringSid(sid, string_sid)
-            raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
+            FFI.raise_windows_error('ConvertSidToStringSid')
           end
 
           result = string_sid.read_pointer.read_string
@@ -95,7 +95,7 @@ module Win32
 
         FFI::MemoryPointer.new(:pointer) do |sid|
           unless ConvertStringSidToSid(string, sid)
-            raise SystemCallError.new("ConvertStringSidToSid", FFI.errno)
+            FFI.raise_windows_error('ConvertStringSidToSid')
           end
 
           ptr = sid.read_pointer
@@ -139,7 +139,7 @@ module Win32
           auth[:Value][5] = authority
 
           unless InitializeSid(sid, auth, sub_authorities.length)
-            raise SystemCallError.new("InitializeSid", FFI.errno)
+            FFI.raise_windows_error('InitializeSid')
           end
 
           sub_authorities.each_index do |i|
@@ -195,11 +195,11 @@ module Win32
             bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, ptoken)
 
             if !bool && FFI.errno != ERROR_NO_TOKEN
-              raise SystemCallError.new("OpenThreadToken", FFI.errno)
+              FFI.raise_windows_error('OpenThreadToken')
             else
               ptoken.clear
               unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptoken)
-                raise SystemCallError.new("OpenProcessToken", FFI.errno)
+                FFI.raise_windows_error('OpenProcessToken')
               end
             end
 
@@ -248,7 +248,7 @@ module Win32
             use_ptr
           )
           unless bool
-            raise SystemCallError.new("LookupAccountSid", FFI.errno)
+            FFI.raise_windows_error('LookupAccountSid')
           end
         elsif ordinal_val < 10 # Assume it's a binary SID.
           account_ptr = FFI::MemoryPointer.from_string(account)
@@ -264,7 +264,7 @@ module Win32
           )
 
           unless bool
-            raise SystemCallError.new("LookupAccountSid", FFI.errno)
+            FFI.raise_windows_error('LookupAccountSid')
           end
 
           account_ptr.free
@@ -279,7 +279,7 @@ module Win32
             use_ptr
           )
           unless bool
-            raise SystemCallError.new("LookupAccountName", FFI.errno)
+            FFI.raise_windows_error('LookupAccountName')
           end
         end
 
@@ -318,7 +318,7 @@ module Win32
 
         FFI::MemoryPointer.new(:pointer) do |ptr|
           unless ConvertSidToStringSid(@sid, ptr)
-            raise SystemCallError.new("ConvertSidToStringSid", FFI.errno)
+            FFI.raise_windows_error('ConvertSidToStringSid')
           end
 
           string = ptr.read_pointer.read_string
