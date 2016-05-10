@@ -124,7 +124,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "constructor raises an error if an invalid account is passed" do
-    assert_raise(SystemCallError){ Security::SID.new('bogus') }
+    assert_raise(SystemCallError, Errno::ESRCH){ Security::SID.new('bogus') }
   end
 
   test "well known sid constants are defined" do
