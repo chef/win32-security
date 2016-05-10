@@ -194,9 +194,7 @@ module Win32
             # Try the thread token first, default to the process token.
             bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, ptoken)
 
-            if !bool && FFI.errno != ERROR_NO_TOKEN
-              FFI.raise_windows_error('OpenThreadToken')
-            else
+            unless bool
               ptoken.clear
               unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptoken)
                 FFI.raise_windows_error('OpenProcessToken')
