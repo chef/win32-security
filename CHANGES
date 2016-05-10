@@ -1,3 +1,14 @@
+== 0.4.1 - 9-May-2016
+* Added the ffi-win32-extensions dependency, and removed the helper file.
+* The SID.new method is now a bit more flexible with regards to failures of
+  the OpenThreadToken function. It now just defaults to OpenProcessToken no
+  matter what, if it can.
+* The Security.elevated_security? method is now more robust, using a double
+  pass approach.
+* The above fixes were mainly to resolve issues on cygwin64. Thanks go to
+  Tobias Hochgürtel and Wouter Scheele for raising the issues and providing
+  providing patches (for both this library and cygwin64 + ffi).
+
 == 0.4.0 - 7-Mar-2016
 * Added wide character support. Thanks go to Ethan J. Brown for finally forcing
   me to get around to this.
