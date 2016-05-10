@@ -58,8 +58,11 @@ module Win32
             te.size,
             rl
           )
+
+          te.free
           te = FFI::MemoryPointer.new(rl.read_ulong)
           rl.clear
+
           bool = GetTokenInformation(
             token,
             :TokenElevation,
