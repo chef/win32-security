@@ -30,6 +30,8 @@ install:
 
     gem update --system > $null
 
+    if ((gem query -i ffi-win32-extensions) -eq $False){ gem install ffi-win32-extensions --no-document }
+
     if ((gem query -i sys-admin) -eq $False){ gem install sys-admin --no-document }
 
     if ((gem query -i test-unit -v ">= 3.0") -eq $False){ gem install test-unit --no-document }
