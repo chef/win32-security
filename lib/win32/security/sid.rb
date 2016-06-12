@@ -14,7 +14,7 @@ module Win32
       extend Windows::Security::Functions
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.2.4'
+      VERSION = '0.2.5'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.

@@ -20,7 +20,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "version is set to expected value" do
-    assert_equal('0.2.4', Security::SID::VERSION)
+    assert_equal('0.2.5', Security::SID::VERSION)
   end
 
   test "sid method basic functionality" do
