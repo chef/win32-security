@@ -2,9 +2,9 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-security'
-  spec.version    = '0.4.1'
+  spec.version    = '0.5.0'
   spec.authors    = ['Daniel J. Berger', 'Park Heesob']
-  spec.license    = 'Artistic 2.0'
+  spec.license    = 'Apache 2.0'
   spec.email      = 'djberg96@gmail.com'
   spec.homepage   = 'https://github.com/djberg96/win32-security'
   spec.summary    = 'A library for dealing with aspects of Windows security.'
