@@ -252,7 +252,7 @@ module Win32
           account_ptr = FFI::MemoryPointer.from_string(account)
 
           bool = LookupAccountSid(
-            host.encode('UTF-16LE'),
+            host.wincode,
             account_ptr,
             sid,
             sid_size,
@@ -268,8 +268,8 @@ module Win32
           account_ptr.free
         else
           bool = LookupAccountName(
-            host.encode('UTF-16LE'),
-            account.encode('UTF-16LE'),
+            host.wincode,
+            account.wincode,
             sid,
             sid_size,
             domain,
