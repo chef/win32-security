@@ -27,7 +27,7 @@
   None at the moment. Suggestions welcome.
    
 == Known Issues
-  There appears to be an issue with 64-bit versions of JRuby. I believe this
+  There appears to be an issue with 64-bit versions of JRuby. I believe it 
   is related to this issue: https://github.com/jruby/jruby/issues/1315. There
   is nothing I can do about it here.
 
@@ -35,14 +35,8 @@
 
   https://github.com/djberg96/win32-security
 
-== Contributions
-  Although this library is free, please consider having your company
-  setup a tip if used by your company professionally.
-
-  https://gratipay.com/~djberg96/
-
 == License
-  Artistic 2.0
+  Apache 2.0
     
 == Copyright
   (C) 2003-2016 Daniel J. Berger
