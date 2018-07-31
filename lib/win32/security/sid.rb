@@ -1,9 +1,3 @@
-require 'windows/security'
-require 'windows/thread'
-require 'windows/process'
-require 'windows/error'
-require 'windows/msvcrt/string'
-require 'windows/msvcrt/buffer'
 require 'socket'
 
 # The Win32 module serves as a namespace only.
@@ -14,23 +8,13 @@ module Win32
 
     # The SID class encapsulates a Security Identifier.
     class SID
-      include Windows::Security
-      include Windows::Error
-      include Windows::MSVCRT::String
-      include Windows::MSVCRT::Buffer
-      include Windows::Thread
-      include Windows::Process
-
-      extend Windows::Security
-      extend Windows::Error
-      extend Windows::MSVCRT::String
-      extend Windows::MSVCRT::Buffer
-
-      # Error class typically raised if any of the SID methods fail
-      class Error < StandardError; end
+      include Windows::Security::Constants
+      include Windows::Security::Functions
+      include Windows::Security::Structs
+      extend Windows::Security::Functions
 
       # The version of the Win32::Security::SID class.
-      VERSION = '0.1.4'
+      VERSION = '0.2.5'
 
       # Some constant SID's for your convenience, in string format.
       # See http://support.microsoft.com/kb/243330 for details.
@@ -91,40 +75,35 @@ module Win32
       # Converts a binary SID to a string in S-R-I-S-S... format.
       #
       def self.sid_to_string(sid)
-        sid_addr = [sid].pack('p*').unpack('L')[0]
-        sid_buf  = 0.chr * 80
-        sid_ptr  = 0.chr * 4
+        result = nil
 
-        unless ConvertSidToStringSid(sid_addr, sid_ptr)
-          raise Error, get_last_error
+        FFI::MemoryPointer.new(:pointer) do |string_sid|
+          unless ConvertSidToStringSid(sid, string_sid)
+            FFI.raise_windows_error('ConvertSidToStringSid')
+          end
+
+          result = string_sid.read_pointer.read_string
         end
 
-        strcpy(sid_buf, sid_ptr.unpack('L')[0])
-        sid_buf.strip
+        result
       end
 
       # Converts a string in S-R-I-S-S... format back to a binary SID.
       #
       def self.string_to_sid(string)
-        string_addr = [string].pack('p*').unpack('L')[0]
-        sid_ptr  = 0.chr * 4
+        result = nil
 
-        unless ConvertStringSidToSid(string_addr, sid_ptr)
-          raise Error, get_last_error
+        FFI::MemoryPointer.new(:pointer) do |sid|
+          unless ConvertStringSidToSid(string, sid)
+            FFI.raise_windows_error('ConvertStringSidToSid')
+          end
+
+          ptr = sid.read_pointer
+
+          result = ptr.read_bytes(GetLengthSid(ptr))
         end
 
-        unless IsValidSid(sid_ptr.unpack('L')[0])
-          raise Error, get_last_error
-        end
-
-        sid_len = GetLengthSid(sid_ptr.unpack('L')[0])
-        sid_buf = 0.chr * sid_len
-
-        unless CopySid(sid_len, [sid_buf].pack('p*').unpack('L')[0], sid_ptr.unpack('L')[0])
-          raise Error, get_last_error
-        end
-
-        sid_buf
+        result
       end
 
       # Creates a new SID with +authority+ and up to 8 +subauthorities+,
@@ -149,24 +128,29 @@ module Win32
       #
       def self.create(authority, *sub_authorities)
         if sub_authorities.length > 8
-           raise ArgumentError, "maximum of 8 subauthorities allowed"
+          raise ArgumentError, "maximum of 8 subauthorities allowed"
         end
 
-        sid = 0.chr * GetSidLengthRequired(sub_authorities.length)
+        size = GetSidLengthRequired(sub_authorities.length)
+        new_obj = nil
 
-        auth = 0.chr * 5 + authority.chr
+        FFI::MemoryPointer.new(:uchar, size) do |sid|
+          auth = SID_IDENTIFIER_AUTHORITY.new
+          auth[:Value][5] = authority
 
-        unless InitializeSid(sid, auth, sub_authorities.length)
-           raise Error, get_last_error
+          unless InitializeSid(sid, auth, sub_authorities.length)
+            FFI.raise_windows_error('InitializeSid')
+          end
+
+          sub_authorities.each_index do |i|
+            ptr = GetSidSubAuthority(sid, i)
+            ptr.write_ulong(sub_authorities[i])
+          end
+
+          new_obj = new(sid.read_string(size)) # Pass a binary string
         end
 
-        sub_authorities.each_index do |i|
-           value = [sub_authorities[i]].pack('L')
-           auth_ptr = GetSidSubAuthority(sid, i)
-           memcpy(auth_ptr, value, 4)
-        end
-
-        new(sid)
+        new_obj
       end
 
       # Creates and returns a new Win32::Security::SID object, based on
@@ -198,108 +182,124 @@ module Win32
       #
       def initialize(account=nil, host=Socket.gethostname)
         if account.nil?
-          htoken = [0].pack('L')
-          bool   = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, htoken)
-          errno  = GetLastError()
-
-          if !bool
-            if errno == ERROR_NO_TOKEN
-              unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, htoken)
-                raise get_last_error
-              end
+          begin
+            if RUBY_PLATFORM == 'java' && ENV_JAVA['sun.arch.data.model'] == '64'
+              ptr_type = :ulong_long
             else
-              raise get_last_error(errno)
+              ptr_type = :uintptr_t
             end
-          end
 
-          htoken = htoken.unpack('V').first
-          cbti = [0].pack('L')
-          token_info = 0.chr * 36
+            ptoken = FFI::MemoryPointer.new(ptr_type)
 
-          bool = GetTokenInformation(
-            htoken,
-            TokenOwner,
-            token_info,
-            token_info.size,
-            cbti
-          )
+            # Try the thread token first, default to the process token.
+            bool = OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, 1, ptoken)
 
-          unless bool
-            raise Error, get_last_error
+            unless bool
+              ptoken.clear
+              unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptoken)
+                FFI.raise_windows_error('OpenProcessToken')
+              end
+            end
+
+            token = ptoken.read_pointer.to_i
+
+            pinfo = FFI::MemoryPointer.new(:pointer)
+            plength = FFI::MemoryPointer.new(:ulong)
+
+            # First pass, just get the size needed (1 is TokenOwner)
+            GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
+
+            pinfo = FFI::MemoryPointer.new(plength.read_ulong)
+            plength.clear
+
+            # Second pass, actual call (1 is TokenOwner)
+            unless GetTokenInformation(token, 1, pinfo, pinfo.size, plength)
+              FFI.raise_windows_error('GetTokenInformation')
+            end
+
+            token_info = pinfo.read_pointer
+          ensure
+            CloseHandle(token) if token
           end
         end
 
-        bool   = false
-        sid    = 0.chr * 28
-        sid_cb = [sid.size].pack('L')
+        ordinal_val = account ? account[0].ord : nil
 
-        domain_buf = 0.chr * 80
-        domain_cch = [domain_buf.size].pack('L')
+        sid = FFI::MemoryPointer.new(:uchar, 1024)
+        sid_size = FFI::MemoryPointer.new(:ulong)
+        sid_size.write_ulong(sid.size)
 
-        sid_name_use = 0.chr * 4
+        domain = FFI::MemoryPointer.new(:uchar, 1024)
+        domain_size = FFI::MemoryPointer.new(:ulong)
+        domain_size.write_ulong(domain.size)
 
-        if account
-          ordinal_val = account[0]
-          ordinal_val = ordinal_val.ord if RUBY_VERSION.to_f >= 1.9
-        else
-          ordinal_val = nil
-        end
+        use_ptr = FFI::MemoryPointer.new(:ulong)
 
         if ordinal_val.nil?
           bool = LookupAccountSid(
             nil,
-            token_info.unpack('L')[0],
+            token_info,
             sid,
-            sid_cb,
-            domain_buf,
-            domain_cch,
-            sid_name_use
+            sid_size,
+            domain,
+            domain_size,
+            use_ptr
           )
+          unless bool
+            FFI.raise_windows_error('LookupAccountSid')
+          end
         elsif ordinal_val < 10 # Assume it's a binary SID.
+          account_ptr = FFI::MemoryPointer.from_string(account)
+
           bool = LookupAccountSid(
-            host,
-            [account].pack('p*').unpack('L')[0],
+            host.wincode,
+            account_ptr,
             sid,
-            sid_cb,
-            domain_buf,
-            domain_cch,
-            sid_name_use
+            sid_size,
+            domain,
+            domain_size,
+            use_ptr
           )
+
+          unless bool
+            FFI.raise_windows_error('LookupAccountSid')
+          end
+
+          account_ptr.free
         else
           bool = LookupAccountName(
-            host,
-            account,
+            host.wincode,
+            account.wincode,
             sid,
-            sid_cb,
-            domain_buf,
-            domain_cch,
-            sid_name_use
+            sid_size,
+            domain,
+            domain_size,
+            use_ptr
           )
-        end
-
-        unless bool
-          raise Error, get_last_error
+          unless bool
+            FFI.raise_windows_error('LookupAccountName')
+          end
         end
 
         # The arguments are flipped depending on which path we took
         if ordinal_val.nil?
-          buf = 0.chr * 260
-          ptr = token_info.unpack('L')[0]
-          memcpy(buf, ptr, token_info.size)
-          @sid = buf.strip
-          @account = sid.strip
+          length = GetLengthSid(token_info)
+          @sid = token_info.read_string(length)
+          @account = sid.read_bytes(sid.size).wstrip
         elsif ordinal_val < 10
-          @sid     = account
-          @account = sid.strip
+          @sid = account
+          @account = sid.read_bytes(sid.size).wstrip
         else
-          @sid     = sid.strip
+          length = GetLengthSid(sid)
+          @sid = sid.read_bytes(length)
           @account = account
         end
 
-        @host   = host
-        @domain = domain_buf.strip
 
-        @account_type = get_account_type(sid_name_use.unpack('L')[0])
+        @host   = host
+        @domain = domain.read_bytes(domain.size).wstrip
+
+        @account_type = get_account_type(use_ptr.read_ulong)
       end
 
       # Synonym for SID.new.
@@ -312,16 +312,17 @@ module Win32
       # storage or transmission.
       #
       def to_s
-        sid_addr = [@sid].pack('p*').unpack('L').first
-        sid_buf  = 0.chr * 80
-        sid_ptr  = 0.chr * 4
+        string = nil
 
-        unless ConvertSidToStringSid(sid_addr, sid_ptr)
-          raise Error, get_last_error
+        FFI::MemoryPointer.new(:pointer) do |ptr|
+          unless ConvertSidToStringSid(@sid, ptr)
+            FFI.raise_windows_error('ConvertSidToStringSid')
+          end
+
+          string = ptr.read_pointer.read_string
         end
 
-        strcpy(sid_buf, sid_ptr.unpack('L').first)
-        sid_buf.strip
+        string
       end
 
       alias to_str to_s

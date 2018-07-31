@@ -4,15 +4,15 @@
 # Test suite for the Win32::Security::SID class. You should run these
 # tests via the 'rake test' task.
 ########################################################################
+require 'etc'
 require 'test-unit'
 require 'win32/security'
-require 'sys/admin'
 include Win32
 
 class TC_Win32_Security_Sid < Test::Unit::TestCase
   def self.startup
     @@host = Socket.gethostname
-    @@name = Sys::Admin.users[0].name
+    @@name = Etc.getlogin
   end
 
   def setup
@@ -20,7 +20,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "version is set to expected value" do
-    assert_equal('0.1.4', Security::SID::VERSION)
+    assert_equal('0.2.5', Security::SID::VERSION)
   end
 
   test "sid method basic functionality" do
@@ -59,8 +59,9 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
     assert_kind_of(String, Security::SID.string_to_sid(@sid.to_s))
   end
 
-  test "string/sid roundtrip works as expected" do
-    assert_true(Security::SID.new(Security::SID.string_to_sid('S-1-5-18')).to_s == 'S-1-5-18')
+  test "we can convert back and forth between a sid and a string" do
+    str = Security::SID.sid_to_string(@sid.sid)
+    assert_equal(@sid.sid, Security::SID.string_to_sid(str))
   end
 
   test "to_s works as expected" do
@@ -101,11 +102,17 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
 
   test "constructor defaults to current account" do
     assert_nothing_raised{ @sid = Security::SID.new }
-    assert_equal(Sys::Admin.get_login, @sid.account)
+    assert_equal(Etc.getlogin, @sid.account)
   end
 
   test "constructor accepts an account argument" do
-    assert_nothing_raised{ Security::SID.new(@@name) }
+    assert_nothing_raised{ @sid = Security::SID.new(@@name) }
+    assert_equal(Etc.getlogin, @sid.account)
+  end
+
+  test "constructor accepts a sid argument" do
+    assert_nothing_raised{ @sid = Security::SID.new(@sid.sid) }
+    assert_equal(Etc.getlogin, @sid.account)
   end
 
   test "constructor accepts a host argument" do
@@ -117,7 +124,7 @@ class TC_Win32_Security_Sid < Test::Unit::TestCase
   end
 
   test "constructor raises an error if an invalid account is passed" do
-    assert_raise(Security::SID::Error){ Security::SID.new('bogus') }
+    assert_raise(SystemCallError, Errno::ESRCH){ Security::SID.new('bogus') }
   end
 
   test "well known sid constants are defined" do
