@@ -2,11 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-security'
-<<<<<<< HEAD
-  spec.version    = '0.1.4'
-=======
   spec.version    = '0.5.0'
->>>>>>> ffi
   spec.authors    = ['Daniel J. Berger', 'Park Heesob']
   spec.license    = 'Apache 2.0'
   spec.email      = 'djberg96@gmail.com'
