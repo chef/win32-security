@@ -1,4 +1,7 @@
-= Description
+# win32-security gem
+
+[![Gem Version](https://badge.fury.io/rb/win32-security.svg)](https://badge.fury.io/rb/win32-security)
+
   A security library for MS Windows that allows you to open existing or
   create new security identifiers (SID's), as well as create access
   control lists (ACL's) and access control entries (ACE's).
