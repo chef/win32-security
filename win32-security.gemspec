@@ -1,5 +1,3 @@
-require 'rubygems'
-
 Gem::Specification.new do |spec|
   spec.name       = 'win32-security'
   spec.version    = '0.5.0'
@@ -10,9 +8,8 @@ Gem::Specification.new do |spec|
   spec.summary    = 'A library for dealing with aspects of Windows security.'
   spec.test_files = Dir['test/*.rb']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
-  spec.cert_chain = Dir['certs/*']
 
-  spec.extra_rdoc_files  = ['README', 'CHANGES', 'MANIFEST']
+  spec.extra_rdoc_files  = ['README.md', 'CHANGELOG.md']
 
   spec.required_ruby_version = '>= 1.9.3'
    
