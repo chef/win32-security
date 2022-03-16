@@ -4,6 +4,12 @@
 <!-- latest_release  0.5.0 -->
 <!-- latest_release -->
 
+<!-- release_rollup -->
+<!-- release_rollup -->
+
+<!-- latest_stable_release -->
+<!-- latest_stable_release -->
+
 ## 0.5.0 - 12-Jun-2016
 * Changed license to Apache 2.0.
 * Fixed a bug in the SID class where arguments weren't encoded properly
