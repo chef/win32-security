@@ -1,4 +1,8 @@
+
 # win32-security changelog
+
+<!-- latest_release  0.5.0 -->
+<!-- latest_release -->
 
 ## 0.5.0 - 12-Jun-2016
 * Changed license to Apache 2.0.
