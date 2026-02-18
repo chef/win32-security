@@ -52,3 +52,6 @@ All Rights Reserved
 
 - Daniel J. Berger
 - Park Heesob
+
+# Copyright
+See [COPYRIGHT.md](./COPYRIGHT.md).
