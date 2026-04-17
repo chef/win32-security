@@ -11,14 +11,14 @@ Gem::Specification.new do |spec|
 
   spec.extra_rdoc_files  = ['README.md', 'CHANGELOG.md']
 
-  spec.required_ruby_version = '>= 1.9.3'
+  spec.required_ruby_version = '>= 3.1.6'
 
-  spec.add_dependency('ffi')
+  spec.add_dependency('ffi', '>= 1.15.5', '< 1.17.0')
   spec.add_dependency('ffi-win32-extensions')
 
   spec.add_development_dependency('rake')
-  spec.add_development_dependency('test-unit', '>= 2.5.0')
-  spec.add_development_dependency('sys-admin', '>= 1.6.0')
+  spec.add_development_dependency('test-unit', '>= 3.6.7')
+  spec.add_development_dependency('sys-admin', '>= 1.8.4')
 
   spec.description = <<-EOF
     The win32-security library provides an interface for dealing with
